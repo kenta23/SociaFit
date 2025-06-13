@@ -4,7 +4,7 @@
     "slug": "sociafit",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/logo_icon.png",
     "scheme": "sociafit",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -12,8 +12,10 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.sociafit.app",
+      "googleServicesFile": "./assets/google/google-services.json",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo.png"
+        "foregroundImage": "./assets/images/logo_icon.png"
       },
       "edgeToEdgeEnabled": true
     },
@@ -24,18 +26,44 @@
     },
     "plugins": [
       "expo-router",
+      "expo-sensors",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+        }
+      ],
       [
         "expo-splash-screen",
         {
           "image": "./assets/images/logo.png",
-          "imageWidth": 250,
+          "width": 200,
           "resizeMode": "contain"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "@react-native-firebase/app",
+      "@react-native-firebase/auth",
+      "@react-native-google-signin/google-signin",
+      "@react-native-firebase/crashlytics",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1af13048-3fe8-43fb-958a-95ff7b5323b4"
+      }
+    },
+    "owner": "drey_rm23"
   }
 }

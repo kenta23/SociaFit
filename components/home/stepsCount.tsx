@@ -1,10 +1,10 @@
 import { Colors } from '@/constants/Colors';
 import { Image } from 'expo-image';
+import { Pedometer } from 'expo-sensors';
 import React, { useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import StepsAndCalories from './stepsAndCalories';
-
 interface StepData {
   value: number;
   color: string;
@@ -21,11 +21,34 @@ export default function StepsCount() {
     const [targetSteps] = useState(2700);
     const colorScheme = useColorScheme() ?? 'light';
     const footstepsIcon = colorScheme === 'dark' ? require('@/assets/images/footsteps-dark.svg') : require('@/assets/images/footsteps.svg');
+    const [pastStepCount, setPastStepCount] = useState(0);
 
     const [stepsCountData] = useState<StepData[]>([
         {value: 70, color: Colors[colorScheme].primary},
         {value: 30, color: 'lightgray'}
     ]);
+
+    const watchSteps = async () => {
+       const PedometerIsAvailable = await Pedometer.isAvailableAsync();
+
+       if (PedometerIsAvailable) { 
+           const end = new Date();
+           const start = new Date();
+           
+           // Set start time to midnight today
+           start.setHours(0, 0, 0, 0);
+           
+           // Set end time to midnight tomorrow
+           end.setHours(23, 59, 59, 999);
+
+           console.log('Tracking steps from:', start.toISOString(), 'to:', end.toISOString());
+
+           const pastStepCountResult = await Pedometer.getStepCountAsync(start, end);
+           if (pastStepCountResult) {
+             setPastStepCount(pastStepCountResult.steps);
+           }
+       }
+    }
 
     const progressPercentage = Math.round((currentSteps / targetSteps) * 100);
 
@@ -138,7 +161,7 @@ const styles = StyleSheet.create({
         borderStyle: "solid",
         borderColor: "#54ee69",
         borderWidth: 1,
-        width: "100%",
+        width: "auto",
         height: 279,
         overflow: "hidden"
     }
