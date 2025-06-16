@@ -13,7 +13,6 @@
     },
     "android": {
       "package": "com.sociafit.app",
-      "googleServicesFile": "./assets/google/google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/logo_icon.png"
       },
@@ -42,10 +41,6 @@
         }
       ],
       "expo-font",
-      "@react-native-firebase/app",
-      "@react-native-firebase/auth",
-      "@react-native-google-signin/google-signin",
-      "@react-native-firebase/crashlytics",
       [
         "expo-build-properties",
         {

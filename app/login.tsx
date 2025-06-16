@@ -1,57 +1,130 @@
 import { supabase } from '@/utils/supabase';
-import { GoogleAuthProvider } from '@react-native-firebase/auth';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { makeRedirectUri } from 'expo-auth-session';
+import * as QueryParams from "expo-auth-session/build/QueryParams";
 import { Image } from 'expo-image';
+import { useURL } from 'expo-linking';
 import { Link } from 'expo-router';
-import React from 'react';
-import { ImageBackground, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, ImageBackground, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+
 export default function Login() {
+   const [email, setEmail] = useState<string>('');
+   const [errorMessage, setErrorMessage] = useState('');
+   const [message, setMessage] = useState('');
+   const [loading, setLoading] = useState(false);
+   const [user, setUser] = useState<any>(null);
+
+
+   console.log('USERTRR', supabase.auth.getUserIdentities().then((res) => {
+    console.log('res', res);
+   }));
+
+
+   useEffect(() => {
+    const fetchUser = async () => {
+      const { data } = await supabase.auth.getUser();
+      setUser(data.user);
+
+      console.log('user', user);
+    }
+    fetchUser();
+   }, []);
+
 
    GoogleSignin.configure({ 
-    webClientId: '500513973402-7f82v30o6ohpj3ctfb35mvv3qv8njnaq.apps.googleusercontent.com',
+     webClientId: '49993852450-49f8n1c7qhd8dnsmsd00ro7g6o0smto3.apps.googleusercontent.com',
+   });
+
+   const redirectTo = makeRedirectUri({ 
+    scheme: 'sociafit',
    });
 
    async function onGoogleButtonPress() {
-    // Check if your device supports Google Play
-    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-    // Get the users ID token
-    const signInResult = await GoogleSignin.signIn();
-
-    let idToken = signInResult.data?.idToken;
-
-    if (!idToken) {
-      // if you are using older versions of google-signin, try old style result
-      idToken = signInResult.data?.idToken;
-    }
-    if (!idToken) {
-      throw new Error('No ID token found');
-    }
+    try {
+      // Check for Google Play services first
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
   
-    // Create a Google credential with the token
-    const googleCredential = GoogleAuthProvider.credential(signInResult.data?.idToken);
-
-    // Sign-in the user with the credential
-   try {
-    const { data, error } = await supabase.auth.signInWithIdToken({
-      provider: 'google',
-      token: idToken,
-    });
-    console.log(data, error);
-    return data;
-   } catch (error: any) {
-    if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-      // user cancelled the login flow
-    } else if (error.code === statusCodes.IN_PROGRESS) {
-      // operation (e.g. sign in) is in progress already
-    } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-      // play services not available or outdated
-    } else {
-      // some other error happened
+      // Sign in
+      const { data: signInResult } = await GoogleSignin.signIn();
+  
+      if (!signInResult?.idToken) {
+        Alert.alert('Login Failed', 'No ID Token was returned');
+        return;
+      }
+    
+      // Send to Supabase Auth
+      const { data, error } = await supabase.auth.signInWithIdToken({ 
+        provider: 'google', 
+        token: signInResult.idToken 
+      });
+  
+      if (error) {
+        Alert.alert('Supabase Error', error?.message);
+      } else {
+        Alert.alert('Success!', `Welcome, ${data?.user?.email}`);
+      }
+    } catch (err) {
+      console.log(err);
+      Alert.alert('Login Error', 'Something went wrong during Google Sign-In');
     }
-   }
 }
+
+
+const sendMagicLink = async () => {
+  if (!email) {
+    setErrorMessage('Please enter your email first');
+    return;
+  }
+
+  setLoading(true);
+  setErrorMessage('');
+  setMessage('');
+
+  try {
+    const { error } = await supabase.auth.signInWithOtp({ 
+      email, 
+      options: { 
+        emailRedirectTo: redirectTo
+      }
+    });
+
+    if (error) {
+      setErrorMessage(error.message);
+    } else {
+      setMessage('Login link has been sent! Check your email inbox.');
+    }
+  } catch (err: any) {
+    setErrorMessage(err?.message || 'Something went wrong');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const createSessionFromUrl = async (url: string) => {
+  const { params, errorCode } = QueryParams.getQueryParams(url);
+  if (errorCode) throw new Error(errorCode);
+  const { access_token, refresh_token } = params;
+  if (!access_token) return;
+  const { data, error } = await supabase.auth.setSession({
+    access_token,
+    refresh_token,
+  });
+  if (error) throw error;
+  return data.session;
+};
+
+
+const url = useURL();
+
+useEffect(() => {
+  if (url) {
+    createSessionFromUrl(url);
+  }
+}, [url]);
 
   return (
     <ImageBackground
@@ -67,6 +140,18 @@ export default function Login() {
 
           <View style={styles.loginContainer}>
             <Text style={styles.description}>Login account using</Text>
+
+            {/**Input email */}
+            {errorMessage ? <Text style={{ color:'red'}}>{errorMessage}</Text> : null }
+{message ? <Text style={{ color:'green'}}>{message}</Text> : null }
+{loading ? <ActivityIndicator color="#000" /> : (
+  <>
+    <TextInput placeholder='Email' style={styles.input} value={email} onChangeText={setEmail} />
+    <Pressable style={{ backgroundColor:'blue', padding:10, borderRadius:10, marginBottom:10 }} onPress={sendMagicLink}>
+      <Text style={{ color:'white' }}>Login with email</Text>
+    </Pressable>
+  </>
+)}
 
             <View style={styles.loginButtonContainer}>
                    <Pressable style={styles.loginButton} onPress={onGoogleButtonPress}>
@@ -102,6 +187,12 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     height: "100%",
+  },
+  input: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 10,
   },
   terms: {
     color: "#73ee84",

@@ -1,10 +1,11 @@
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { supabase } from '@/utils/supabase';
 import { Inter_200ExtraLight, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
-import { getAuth } from '@react-native-firebase/auth';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 
 
 
@@ -12,35 +13,38 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const pathname = usePathname();
   const router = useRouter();
-  const auth = getAuth();
 
-  // useEffect(() => {
-  //   const handleAuthState = () => {
-  //     const currentUser = auth.currentUser;
 
-  //     console.log('Current user:', currentUser);
 
-  //     // If user is authenticated and on login page, redirect to tabs
-  //     if (currentUser && pathname === '/login') {
-  //       console.log('Redirecting to tabs');
-  //       router.replace('/(tabs)');
-  //     }
-  //     // If no user and not on login page, redirect to login
-  //     else if (!currentUser && pathname !== '/login') {
-  //       console.log('Redirecting to login');
-  //       router.replace('/login');
-  //     }
-  //   };
 
-  //   // Initial check
-  //   handleAuthState();
+  useEffect(() => {
+    const handleAuthState = async () => {
+      const { data } = await supabase.auth.getSession();
+      console.log('data', data);
+      console.log('Current user:', data.session?.user);
 
-  //   // Subscribe to auth state changes
-  //   const unsubscribe = auth.onAuthStateChanged(handleAuthState);
+      // If user is authenticated and on login page, redirect to tabs
+      if (data.session?.user.id && pathname === '/login') {
+        console.log('Redirecting to tabs');
+        router.replace('/(tabs)');
+      }
+      // If no user and not on login page, redirect to login
+      else if (!data.session?.user.id  && pathname !== '/login') {
+        console.log('Redirecting to login');
+        router.replace('/login');
+      }
+    };
 
-  //   // Cleanup subscription
-  //   return () => unsubscribe();
-  // }, [pathname]); // Only depend on pathname changes
+    // Initial check
+    handleAuthState();
+
+    // Subscribe to auth state changes
+    const unsubscribe = supabase.auth.onAuthStateChange(handleAuthState);
+
+    // Cleanup subscription
+    return () => unsubscribe.data.subscription.unsubscribe();
+
+  }, [pathname, router]); // Only depend on pathname changes
 
   const [loaded] = useFonts({
     Inter_200ExtraLight,
