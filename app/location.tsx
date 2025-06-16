@@ -2,7 +2,7 @@ import * as Loc from 'expo-location';
 import { getDistance } from 'geolib';
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import MapView, { Marker, Polyline } from 'react-native-maps';
+import MapView, { Marker, Polyline, UrlTile } from 'react-native-maps';
 
 
 const mockCoord = {
