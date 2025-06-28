@@ -69,6 +69,7 @@ export default function RootLayout() {
         <Stack.Screen name='location' options={{ headerShown: true, title: 'Location',  gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
         <Stack.Screen name='location2' options={{ headerShown: true, title: 'Location2',  gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
         <Stack.Screen name="+not-found" />
+        <Stack.Screen name="tips/[id]" options={{ headerShown: true, title: 'Tips',  gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

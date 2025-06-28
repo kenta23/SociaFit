@@ -67,7 +67,6 @@ const html = `
 export default function DistanceMap() {
   const webviewRef = useRef<WebView | null>(null);
   const [distance, setDistance] = useState(0);
-  const [tick, setTick] = useState(0);
   const [location, setLocation] = useState<{
     latitude: number;
     longitude: number;

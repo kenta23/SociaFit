@@ -1,5 +1,5 @@
 import { supabase } from '@/utils/supabase';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { makeRedirectUri } from 'expo-auth-session';
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import { Image } from 'expo-image';
@@ -35,11 +35,14 @@ export default function Login() {
 
 
    GoogleSignin.configure({ 
+     scopes: ['email'],
      webClientId: '49993852450-49f8n1c7qhd8dnsmsd00ro7g6o0smto3.apps.googleusercontent.com',
+     offlineAccess: true,
    });
 
    const redirectTo = makeRedirectUri({ 
     scheme: 'sociafit',
+    native: 'sociafit://', 
    });
 
    async function onGoogleButtonPress() {
@@ -66,9 +69,18 @@ export default function Login() {
       } else {
         Alert.alert('Success!', `Welcome, ${data?.user?.email}`);
       }
-    } catch (err) {
-      console.log(err);
-      Alert.alert('Login Error', 'Something went wrong during Google Sign-In');
+    } catch (err: any) {
+      if (err.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+        Alert.alert('Login Cancelled', 'You cancelled the login flow');
+      } else if (err.code === statusCodes.IN_PROGRESS) {
+        Alert.alert('Login In Progress', 'You are already logging in');
+      } else if (err.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        Alert.alert('Play Services Not Available', 'Play services are not available or outdated');
+      } else {
+        // some other error happened
+        Alert.alert('Login Error', 'Something went wrong during Google Sign-In');
+      }
     }
 }
 

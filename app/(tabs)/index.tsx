@@ -1,6 +1,8 @@
 import DistanceMap from '@/components/home/distance';
 import StepsCount from '@/components/home/stepsCount';
 import Streaks from '@/components/home/streaks';
+import WorkoutTips from '@/components/home/tips';
+import WorkoutSchedule from '@/components/home/workoutschedule';
 import { Colors } from '@/constants/Colors';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -48,6 +50,13 @@ export default function HomeScreen() {
 
           {/**Streaks */}
           <Streaks />
+
+          {/**Workout Schedule */}
+          <WorkoutSchedule />
+
+          {/**Workout Tips */}
+          <WorkoutTips />
+          
         </View>
       </ScrollView>
     </SafeAreaView>
