@@ -29,14 +29,13 @@ export default function TabLayout() {
             position: 'absolute',
           },
           default: {
-            height: 70,
+            height: 75,
             backgroundColor: '#191B1A',
           },
         }),
         tabBarLabelStyle: {
           fontFamily: 'Inter_400Regular',
           fontSize: 12,
-          lineHeight: 16,
         },
         tabBarLabelPosition: 'below-icon'
       }}>
@@ -44,21 +43,21 @@ export default function TabLayout() {
         name="history"
         options={{
           title: 'History',
-          tabBarIcon: ({ color }) => <FontAwesome5 name="history" size={28} color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome5 name="history" size={22} color={color} />,
         }}
       />
       <Tabs.Screen 
         name="feeds"
         options={{
           title: 'Feeds',
-          tabBarIcon: ({ color }) => <FontAwesome name="feed" size={28} color={color} />,
+          tabBarIcon: ({ color }) => <FontAwesome name="feed" size={22} color={color} />,
         }}
       />
       <Tabs.Screen 
          name="index"
          options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28}  name="house.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={22}  name="house.fill" color={color} />,
          }}
        />
        <Tabs.Screen 
@@ -70,7 +69,7 @@ export default function TabLayout() {
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color }) => <Ionicons name="settings-outline" size={28} color={color} />,
+          tabBarIcon: ({ color }) => <Ionicons name="settings-outline" size={22} color={color} />,
         }}
       />
     </Tabs>

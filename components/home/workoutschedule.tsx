@@ -26,6 +26,7 @@ export default function WorkoutSchedule() {
                 <Text>Tuesday</Text>
               </View>
             </View>
+
             <View style={[styles.frameWrapper, styles.workoutDays]}>
               <View style={[styles.item]}>
                 <MaterialCommunityIcons name="fire" size={24} color="black" />
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
      marginVertical: 16,
   },
   workoutDays: {
-    backgroundColor: "#73ee84"
+    backgroundColor: "rgb(165, 242, 175)"
   },
   nonWorkoutDays: { 
     borderColor: "#e9a8c9",
@@ -96,9 +97,12 @@ const styles = StyleSheet.create({
  
   title: {
     fontSize: 18,
-    fontWeight: "600",
-    fontStyle: 'normal'
+    fontWeight: "500",
+    fontFamily: "Inter_500Medium",
+    textAlign: 'left',
+    alignItems: 'stretch'
   },
+
   iwwadeleteIcon: {
     overflow: "hidden"
   },

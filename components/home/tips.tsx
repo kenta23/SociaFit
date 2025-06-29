@@ -6,7 +6,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function WorkoutTips() { 
      return (
          <View style={styles.parent}>
-             <Text style={styles.workoutTips}>Workout Tips</Text>
+             <Text style={styles.title}>Workout Tips</Text>
 
                  <View style={styles.frameParent}>
 
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         left: 15,
         textAlign: "left",
-        fontFamily: "Inter-Medium",
+        fontFamily: "Inter_500Medium",
         fontWeight: "500"
     },
     tooBusyToPosition: {
@@ -134,11 +134,11 @@ const styles = StyleSheet.create({
         position: "absolute",
         textAlign: "left"
     },
-    workoutTips: {
+    title: {
         fontSize: 18,
         color: "#000",
         textAlign: "left",
-        fontFamily: "Inter-Medium",
+        fontFamily: "Inter_500Medium",
         fontWeight: "500",
         alignSelf: "stretch"
     },
