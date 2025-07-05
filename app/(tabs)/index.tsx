@@ -16,8 +16,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView edges={["top"]}>
-      <ScrollView
-        style={[
+      <ScrollView style={[
           styles.container,
           { backgroundColor: Colors[colorScheme].background },
         ]}
@@ -26,7 +25,7 @@ export default function HomeScreen() {
         <View style={{ marginTop: 16 }}>
           <Pressable
             style={styles.frameParent}
-            onPress={() => router.push("/login")}
+            onPress={() => router.push("/profile")}
           >
             <Image
               source={require("@/assets/images/user-default.png")}
