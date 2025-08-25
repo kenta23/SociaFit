@@ -1,30 +1,33 @@
+import { typography } from '@/constants/typography';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function StepsAndCalories() {
   return (
     <View style={styles.container}>
+      {/** Steps count */}
       <View style={styles.frameParent}>
         <View style={styles.frameGroup}>
           <View style={styles.stepsCountParent}>
             <Text
-              style={[styles.stepsCount, styles.todayClr]}
+              style={[typography.description, styles.todayClr]}
             >{`Steps count `}</Text>
-            <Text style={styles.text}>1200</Text>
+            <Text style={[typography.heading, styles.text]}>1200</Text>
           </View>
-          <Text style={[styles.today, styles.todayClr]}>Today</Text>
+          <Text style={[typography.medium, styles.todayClr]}>Today</Text>
         </View>
       </View>
 
+      {/** Calories burnt */}
       <View style={styles.frameParent}>
         <View style={styles.frameGroup}>
           <View style={styles.stepsCountParent}>
-            <Text style={[styles.stepsCount, styles.todayClr]}>
+            <Text style={[typography.description, styles.todayClr]}>
               Calories burnt
             </Text>
-            <Text style={styles.text}>539</Text>
+            <Text style={[typography.heading, styles.text]}>539</Text>
           </View>
-          <Text style={[styles.today, styles.todayClr]}>kCal</Text>
+          <Text style={[typography.medium, styles.todayClr]}>kCal</Text>
         </View>
       </View>
       
@@ -45,14 +48,6 @@ const styles = StyleSheet.create({
         color: "#000",
         letterSpacing: -0.2,
         textAlign: "left"
-        },
-        stepsCount: {
-        fontSize: 10,
-        lineHeight: 10,
-        fontWeight: "300",
-        fontFamily: "Inter-Light",
-        textAlign: "left",
-        alignSelf: "stretch"
         },
         text: {
         fontSize: 18,

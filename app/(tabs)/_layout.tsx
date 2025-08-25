@@ -3,18 +3,20 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Tabs } from 'expo-router';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { Image } from 'expo-image';
+import { Tabs, useRouter } from 'expo-router';
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, Pressable } from 'react-native';
 
 
 
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const router = useRouter();
 
   return (
     <Tabs
@@ -39,6 +41,25 @@ export default function TabLayout() {
         },
         tabBarLabelPosition: 'below-icon'
       }}>
+      {/** Home */}
+       <Tabs.Screen 
+         name="index"
+         options={{
+          title: 'Home',
+          tabBarIcon: ({ color }) => <IconSymbol size={22}  name="house.fill" color={color} />,
+         }}
+       />
+
+       {/**Feeds */}
+       <Tabs.Screen 
+        name="feeds"
+        options={{
+          title: 'Feeds',
+          tabBarIcon: ({ color }) => <MaterialCommunityIcons name="newspaper-variant-outline" size={22} color={color} />,
+        }}
+      />
+
+      {/**History */}
       <Tabs.Screen
         name="history"
         options={{
@@ -46,32 +67,19 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <FontAwesome5 name="history" size={22} color={color} />,
         }}
       />
-      <Tabs.Screen 
-        name="feeds"
-        options={{
-          title: 'Feeds',
-          tabBarIcon: ({ color }) => <FontAwesome name="feed" size={22} color={color} />,
-        }}
-      />
-      <Tabs.Screen 
-         name="index"
-         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={22}  name="house.fill" color={color} />,
-         }}
-       />
+
+
+   {/**Settings */}
        <Tabs.Screen 
-       name="Home"
+       name="settings"
        options={{
-        title: 'Home',
+        title: 'Settings',
+        headerShown: true,  
+        headerBackButtonDisplayMode: 'default',
+        headerLeft: () => <Pressable style={{ marginLeft: 8 }} onPress={() => router.back()}><Image source={require('@/assets/back button.svg')} style={{ width: 26, height: 26 }} /></Pressable>,
+        tabBarIcon: ({ color }) => <Ionicons name="settings-outline" size={22} color={color} />,
        }} />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color }) => <Ionicons name="settings-outline" size={22} color={color} />,
-        }}
-      />
+
     </Tabs>
   );
 }

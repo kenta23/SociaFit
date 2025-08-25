@@ -1,12 +1,16 @@
+import { Colors } from '@/constants/Colors';
+import { typography } from '@/constants/typography';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
 
 
 export default function Profile() {
+
+    const colorScheme = useColorScheme() ?? 'light';
 
     return (
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
@@ -25,49 +29,51 @@ export default function Profile() {
                         <Image style={styles.frameChild} contentFit="cover" source={require('@/assets/images/no-user.png')} />
                  
                         <View style={styles.nameContainer}>
-                            <Text style={[styles.myName]}>Rusty Miguel O. Ramos</Text>
-                            <Text style={styles.username}>@dreyyy</Text>
+                            <Text style={[typography.heading]}>Rusty Miguel O. Ramos</Text>
+                            <Text style={typography.medium}>@dreyyy</Text>
                         </View>
                     </View>
 
 
                     <View style={[styles.frameGroup, styles.frameFlexBox]}>
                         <View style={[styles.groupFlexBox]}>
-                            <Text style={[styles.values]}>400</Text>
-                            <Text style={[styles.description]}>Total likes</Text>
+                            <Text style={[typography.medium]}>400</Text>
+                            <Text style={[typography.description]}>Total likes</Text>
                         </View>
 
                         <View style={[styles.groupFlexBox]}>
-                            <Text style={[styles.values]}>26</Text>
-                            <Text style={[styles.description]}>Activities</Text>
+                            <Text style={[typography.medium]}>26</Text>
+                            <Text style={[typography.description]}>Activities</Text>
                         </View>
 
                         <View style={styles.groupFlexBox}>
-                            <Text style={[styles.values]}>55</Text>
-                            <Text style={[styles.description]}>Followers</Text>
+                            <Text style={[typography.medium]}>55</Text>
+                            <Text style={[typography.description]}>Followers</Text>
                         </View>
 
                     </View>
                 </View>
             </View>
 
+   {/** Horizontal Line */}
+   <View style={{ height: 1, backgroundColor: Colors[colorScheme].text['50'], width: '100%', marginVertical: 10 }} />
 
             {/**YOUR ACTIVITIES */}
             <View style={styles.activitiesContainer}>
-                <Text style={styles.activitiesTitle}>Your Activities</Text>
+                <Text style={typography.subheading}>Your Activities</Text>
 
-               <View style={{ gap: 10, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>          
-             
-                 <View style={styles.activity}>
-                   <View style={{ paddingHorizontal: 12, alignSelf: 'flex-start' }}>     
-                       <View style={styles.activityHeader}>
-                        
+            <View style={{ gap: 10, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>            
+              {/**Activity 1 */}
+                 <View style={[styles.activity, { backgroundColor: Colors[colorScheme].frameBackground,shadowColor: '#DBDADA', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }]}>
+                   <View style={{ paddingHorizontal: 10, alignSelf: 'flex-start' }}>     
+                     
+                       <View style={styles.activityHeader}>   
                         <View style={styles.user}>
                             <Image style={styles.userImage} contentFit="cover" source={require('@/assets/images/no-user.png')} />
                            
                            <View>
-                               <Text style={styles.userName}>Rusty Miguel O. Ramos</Text>
-                               <Text style={styles.date}>gkjgkjskjkjgs</Text>
+                               <Text style={typography.medium}>Rusty Miguel O. Ramos</Text>
+                               <Text style={typography.small}>gkjgkjskjkjgs</Text>
                            </View>
                         </View>
 
@@ -81,59 +87,21 @@ export default function Profile() {
 
 
                    <View style={styles.activityContent}>
-                        <Text style={styles.activityContentText}>Content....</Text>
+                        <Text style={typography.description}>Content....</Text>
 
 
                          {/**ACTIVITY MEDIA */}
-                        <View style={styles.activityContentImage}>
+
                              <View style={styles.activityContentImageContainer}>
                                 <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
                                 <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
                                 <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
                                 <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
                              </View>
-                        </View>
+
                    </View>
                 </View>
 
-
-               <View style={styles.activity}>
-                   <View style={{ paddingHorizontal: 12, alignSelf: 'flex-start' }}>     
-                       <View style={styles.activityHeader}>
-                        
-                        <View style={styles.user}>
-                            <Image style={styles.userImage} contentFit="cover" source={require('@/assets/images/no-user.png')} />
-                           
-                           <View>
-                               <Text style={styles.userName}>Rusty Miguel O. Ramos</Text>
-                               <Text style={styles.date}>gkjgkjskjkjgs</Text>
-                           </View>
-                        </View>
-
-
-                        <View style={styles.activityOption}>
-                            <Ionicons name='ellipsis-vertical' size={24} color='#3591DD' />
-                        </View>
-                     </View>
-                   </View>
-
-
-
-                   <View style={styles.activityContent}>
-                        <Text style={styles.activityContentText}>Content....</Text>
-
-
-                         {/**ACTIVITY MEDIA */}
-                        <View style={styles.activityContentImage}>
-                             <View style={styles.activityContentImageContainer}>
-                                <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                                <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                                <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                                <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                             </View>
-                        </View>
-                   </View>
-                </View>
 
             </View>
         </View>
@@ -149,7 +117,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
     activityContentImageContainer: { 
         width: '100%',
-        height: '100%',
+        height: 'auto',
         flexDirection: 'row',
         flexWrap: 'wrap',
         gap: 10,
@@ -158,23 +126,16 @@ const styles = StyleSheet.create({
     },
     activityContentImage: { 
         width: '100%',
-        minWidth: 150,
+        maxWidth: 155,
+        minWidth: 110,
         height: 150,
         borderRadius: 8,
-        flex: 1,
-    },
-    activityContentText: {  
-        textAlign: 'left',
-        fontSize: 14,
-        fontFamily: "Inter_400Regular",
-        fontWeight: "400",
+       
     },
     activityContent: { 
-        paddingHorizontal: 12,
+        paddingHorizontal: 16,
         paddingVertical: 8,
-        backgroundColor: 'white',
         height: 'auto',
-        minHeight: 100,
     },
     activityOption: { 
         padding: 8,
@@ -200,36 +161,31 @@ const styles = StyleSheet.create({
         fontFamily: "Inter_400Regular",
     },
     activityHeader: { 
-        minHeight: 100,
+        paddingVertical: 12,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         height: 'auto',
         width: '100%',  
-    },
+    }, 
     activity: { 
-        backgroundColor: 'lightgray',
         borderRadius: 24,
         height: 'auto',
         width: '96%',
         marginHorizontal: 'auto',
         paddingBottom: 10,
         marginTop: 10,
+        borderWidth: 1,
     },
-    activitiesTitle: { 
-        fontSize: 18,
-        fontFamily: "Inter_500Medium",
-        fontWeight: "500",
-        textAlign: "center",
-        marginBottom: 10,
-    },
+
     container: { 
         flex: 1,
         width: '100%',
-        paddingHorizontal: 12,
+        paddingHorizontal: 24,
       },
     activitiesContainer: { 
-         marginTop: 30,
+         marginTop: 12,
+         gap: 10,
     },
     qrCodeScanner: {
         position: 'absolute',
@@ -246,9 +202,8 @@ const styles = StyleSheet.create({
     /**Your Profile View Styles */
     parent: {
         marginTop: 25,
-        padding: 16,
+        paddingVertical: 12,
         height: 'auto',
-        minHeight: 200,
     },
     frameFlexBox: {
         alignItems: "center",

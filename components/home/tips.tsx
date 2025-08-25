@@ -1,3 +1,4 @@
+import { typography } from '@/constants/typography';
 import { Image } from 'expo-image';
 import { Link } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
@@ -6,7 +7,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function WorkoutTips() { 
      return (
          <View style={styles.parent}>
-             <Text style={styles.title}>Workout Tips</Text>
+             <Text style={typography.heading}>Workout Tips</Text>
 
                  <View style={styles.frameParent}>
 
@@ -87,7 +88,7 @@ export default function WorkoutTips() {
 const styles = StyleSheet.create({
     parent: {
         flex: 1,
-        marginVertical: 16,
+        marginVertical: 8,
         width: '100%',
         height: 'auto',
         gap: 20

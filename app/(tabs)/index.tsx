@@ -4,6 +4,7 @@ import Streaks from '@/components/home/streaks';
 import WorkoutTips from '@/components/home/tips';
 import WorkoutSchedule from '@/components/home/workoutschedule';
 import { Colors } from '@/constants/Colors';
+import { typography } from '@/constants/typography';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
@@ -33,14 +34,14 @@ export default function HomeScreen() {
               style={styles.userImage}
             />
             <Text
-              style={[styles.user, { color: Colors[colorScheme].text["0"] }]}
+              style={[typography.subheading, { color: Colors[colorScheme].text["0"] }]}
             >
               Hello Rusty Miguel!
             </Text>
           </Pressable>
         </View>
 
-        <View style={{ marginTop: 2, gap: 24, alignItems: "center" }}>
+        <View style={{ marginTop: 2, gap: 32, alignItems: "center" }}>
           {/**Steps Count */}
           <StepsCount />
 
@@ -73,12 +74,12 @@ const styles = StyleSheet.create({
   width: 40,
   height: 40,
   },
-  user: {
+user: {
   fontSize: 14,
   textAlign: "left",
   fontFamily: 'Inter_400Regular'
   },
-  frameParent: {
+frameParent: {
   flex: 1,
   width: "100%",
   flexDirection: "row",

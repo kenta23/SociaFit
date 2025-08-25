@@ -1,3 +1,4 @@
+import { typography } from '@/constants/typography';
 import { Image } from 'expo-image';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
@@ -27,7 +28,7 @@ export default function Streaks() {
           <Text style={styles.streakCount}>49</Text>
         </View>
       </View>
-      <Text style={styles.description}>
+      <Text style={typography.subheading}>
         You made straight 49 streaks, keep it up!
       </Text>
     </View>

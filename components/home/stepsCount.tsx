@@ -1,4 +1,5 @@
 import { Colors } from '@/constants/Colors';
+import { typography } from '@/constants/typography';
 import { Image } from 'expo-image';
 import { Pedometer } from 'expo-sensors';
 import React, { useState } from 'react';
@@ -20,7 +21,7 @@ export default function StepsCount() {
     const [currentSteps] = useState(300);
     const [targetSteps] = useState(2700);
     const colorScheme = useColorScheme() ?? 'light';
-    const footstepsIcon = colorScheme === 'dark' ? require('@/assets/images/footsteps-dark.svg') : require('@/assets/images/footsteps.svg');
+    const footstepsIcon = require('@/assets/images/footsteps.svg');
     const [pastStepCount, setPastStepCount] = useState(0);
 
     const [stepsCountData] = useState<StepData[]>([
@@ -81,16 +82,16 @@ export default function StepsCount() {
           <View style={styles.stepsParent}>
             <Text
               style={[
-                styles.steps,
+                typography.heading,
                 styles.stepsFlexBox,
-                { color: Colors[colorScheme].text["0"] },
+                { color: Colors[colorScheme].text['0'] },
               ]}
             >
               {`${currentSteps}/${targetSteps} steps`}
             </Text>
             <Text
               style={[
-                styles.textDescription,
+                typography.description,
                 styles.stepsFlexBox,
                 { color: Colors[colorScheme].text["0"] },
               ]}
@@ -126,17 +127,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
         color: "#000",
         alignSelf: "stretch"
-    },
-    frameChild: {},
-    steps: {
-        fontSize: 20,
-        lineHeight: 22,
-        fontWeight: "500",
-        fontFamily: "Inter-Medium"
-    },
-    textDescription: {
-        fontSize: 12,
-        fontFamily: "Inter-Regular"
     },
     stepsParent: {
         gap: 6,

@@ -30,6 +30,7 @@ type ColorScheme = {
   icon: string;
   tabIconDefault: string;
   tabIconSelected: string;
+  frameBackground: string;
 }
 
 type colorType = {
@@ -76,6 +77,7 @@ export const Colors: colorType = {
       0: "",
       800: ""
     },
+    frameBackground: 'rgba(172,172,172,0.2)',
     tint: tintColor,
     icon: '#fff',
     tabIconDefault: '#fff',
@@ -90,6 +92,7 @@ export const Colors: colorType = {
       600: '#585757',
       800: '#272626',
     },
+    frameBackground: 'rgba(172,172,172,0.1)',
     background: '#222520', //change values you want
     tint: tintColorDark,
     icon: '#fff',
