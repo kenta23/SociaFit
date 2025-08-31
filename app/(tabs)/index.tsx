@@ -10,6 +10,8 @@ import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+
+
 export default function HomeScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const router = useRouter();

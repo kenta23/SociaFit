@@ -3,7 +3,7 @@ import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-si
 import { makeRedirectUri } from 'expo-auth-session';
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import { Image } from 'expo-image';
-import { useURL } from 'expo-linking';
+import { useLinkingURL } from 'expo-linking';
 import { Link } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, ImageBackground, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -130,7 +130,7 @@ const createSessionFromUrl = async (url: string) => {
 };
 
 
-const url = useURL();
+const url = useLinkingURL();
 
 useEffect(() => {
   if (url) {

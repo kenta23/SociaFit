@@ -8,7 +8,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
 
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const pathname = usePathname();
@@ -61,18 +60,20 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="privacy" options={{ headerShown: true, title: 'Privacy Policy', gestureEnabled: true, headerBackButtonDisplayMode: 'generic'}} />
-        <Stack.Screen name='terms_conditions' options={{ headerShown: true, title: 'Terms and Conditions',  gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
-        <Stack.Screen name='location' options={{ headerShown: true, title: 'Location',  gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
-        <Stack.Screen name='location2' options={{ headerShown: true, title: 'Location2',  gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
-        <Stack.Screen name="+not-found" />
-        <Stack.Screen name="tips/[id]" options={{ headerShown: true, title: 'Tips',  gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
-        <Stack.Screen name="profile" options={{ headerShown: true, title: 'Profile',  gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
-      </Stack>
-      <StatusBar style="auto" />
+
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="privacy" options={{ headerShown: true, title: 'Privacy Policy', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
+          <Stack.Screen name='terms_conditions' options={{ headerShown: true, title: 'Terms and Conditions', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
+          <Stack.Screen name='location' options={{ headerShown: true, title: 'Location', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
+          <Stack.Screen name='location2' options={{ headerShown: true, title: 'Location2', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
+          <Stack.Screen name="+not-found" />
+          <Stack.Screen name="tips/[id]" options={{ headerShown: true, title: 'Tips', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
+          <Stack.Screen name="profile" options={{ headerShown: true, title: 'Profile', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
+        </Stack>
+        <StatusBar style="auto" />
+
     </ThemeProvider>
   );
 }
