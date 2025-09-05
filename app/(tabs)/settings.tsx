@@ -9,237 +9,220 @@ import React, { useEffect, useState } from 'react';
 import { FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+const sampledata =[
+  {
+    "category_id": 2,
+    "created_at": "2025-09-01T12:51:53.122996",
+    "id": 1,
+    "workout_categories": {
+      "category": "strength",
+      "created_at": "2025-08-31T10:40:23.182744",
+      "id": 2,
+      "name": "Back"
+    },
+    "workout_id": 1
+  },
+  {
+    "category_id": 5,
+    "created_at": "2025-09-01T12:52:37.71055",
+    "id": 2,
+    "workout_categories": {
+      "category": "strength",
+      "created_at": "2025-08-31T10:40:23.182744",
+      "id": 5,
+      "name": "Arms"
+    },
+    "workout_id": 1
+  },
+  {
+    "category_id": 5,
+    "created_at": "2025-09-03T12:13:52.26582",
+    "id": 4,
+    "workout_categories": {
+      "category": "strength",
+      "created_at": "2025-08-31T10:40:23.182744",
+      "id": 5,
+      "name": "Arms"
+    },
+    "workout_id": 5
+  },
+  {
+    "category_id": 7,
+    "created_at": "2025-09-03T12:14:38.352767",
+    "id": 6,
+    "workout_categories": {
+      "category": "cardio",
+      "created_at": "2025-08-31T10:40:23.182744",
+      "id": 7,
+      "name": "Cardio"
+    },
+    "workout_id": 1
+  }
+]
 
-const workOutDays = [
+ const sampledata2 =[ 
+   { 
+     "category_id": 2,
+     "created_at": "2025-09-01T12:51:53.122996", 
+     "id": 1, 
+     "workout_categories": {
+       "category": "strength", 
+       "created_at": "2025-08-31T10:40:23.182744", 
+       "id": 2, 
+       "name": "Back" 
+    }, 
+    "workout_id": 1 
+  }, 
+  { 
+    "category_id": 5, 
+    "created_at": "2025-09-01T12:52:37.71055", 
+    "id": 2, 
+    "workout_categories": null, 
+    "workout_id": 1 
+  }, 
+  { 
+    "category_id": 5, 
+    "created_at": "2025-09-03T12:13:52.26582", 
+    "id": 4, 
+    "workout_categories": null, 
+    "workout_id": 5 
+  }, 
   {
-    id: 1,
-    name: 'Monday',
-    workout: 'Chest, Shoulders, and Triceps',
-  },
-  {
-    id: 2,
-    name: 'Tuesday',
-    workout: 'Back, Biceps, and Abs',
-  },
-  {
-    id: 3,
-    name: 'Wednesday',
-    workout: 'Legs, Glutes, and Core',
-  },
-  {
-    id: 4,
-    name: 'Thursday',
-    workout: 'Upper Body, Lower Body, and Core',
-  },
-  {
-    id: 5,
-    name: 'Friday',
-    workout: 'Cardio, Strength, and Flexibility',
-  },
-  {
-    id: 6,
-    name: 'Saturday',
-    workout: 'Rest Day',
-  },
-  {
-    id: 7,
-    name: 'Sunday',
-    workout: 'Rest Day',
-  },
-];
+     "category_id": 7, 
+     "created_at": "2025-09-03T12:14:38.352767", 
+     "id": 6, 
+     "workout_categories": null, 
+     "workout_id": 1 
+    }
+  ]
 
 
+
+  //updating workout split 
+  //1. check workout split 
+  //2. store to a state 
+  //3. update the database
 
 export default function settings() {
   const colorScheme = useColorScheme() ?? 'light';
   const [openModal, setOpenModal] = useState<{ [key: number]: boolean }>({});
   const [days, setDays] = useState<any[] | null>([]);
-  const [daysOfWeek, setDaysOfWeek] = useState<Database['public']['Tables']['days_of_week']['Row'][] | null>([]);
-  const [workoutSplits, setWorkoutSplits] = useState<Database['public']['Tables']['workout_splits']['Row'][] | null>([]);
+  const [daysOfWeek, setDaysOfWeek] = useState([
+    {
+      id: 1,
+      name: 'Monday',
+    },
+    {
+      id: 2,
+      name: 'Tuesday',
+    },
+    {
+      id: 3,
+      name: 'Wednesday',
+    },
+    {
+      id: 4,
+      name: 'Thursday',
+    },
+    {
+      id: 5,
+      name: 'Friday',
+    },
+    {
+      id: 6,
+      name: 'Saturday',
+    },
+    {
+      id: 7,
+      name: 'Sunday',
+    },
+  ]);
+
+  const [workoutSplits, setWorkoutSplits] = useState<any[] | null>([]);
   const [workoutCategories, setWorkoutCategories] = useState<Database['public']['Tables']['workout_categories']['Row'][] | null>([]);
-  const [categories, setCategories] = useState([
-     { 
-       id: 1, 
-       name: 'Chest',
-       checked: false,
-     },
-     { 
-       id: 2, 
-       name: 'Back',
-       checked: false,
-     },
-     { 
-       id: 3, 
-       name: 'Legs',
-       checked: false,
-     },
-     { 
-       id: 4, 
-       name: 'Shoulders',
-       checked: false,
-     },
-     { 
-       id: 5, 
-       name: 'Arms',
-       checked: false,
-     },
-     { 
-       id: 6, 
-       name: 'Core',
-       checked: false,
-     },
-     { 
-       id: 7, 
-       name: 'Cardio',
-       checked: false,
-     },
-     { 
-       id: 8, 
-       name: 'Rest Day',
-       checked: false,
-     },
-     {
-      id: 9,
-      name: 'Flexibility',
-      checked: false,
-     }
-  ])
+  const [storeWorkoutSplit, setStoreWorkoutSplit] = useState<{id: number, checked: boolean}[]>([]);
 
 
-  useEffect(() => { 
-     const fetchWorkoutSplits = async () => {
-      const user = await supabase.auth.getUser();
-      const { data, error } = await supabase.from('days_of_week').select('*')
-      const { data: workoutSplits, error: workoutSplitsError } = await supabase.from('workout_splits').select('*, workout_categories(*)').eq('user_id', user.data.user?.id as string);
-      const { data: workoutCategories, error: workoutCategoriesError } = await supabase.from('workout_categories').select('*');
-
-      const filteredWorkoutSplits = workoutSplits?.filter((split: any) => split.workout_id === data?.[0].id);
-     
-      setWorkoutSplits(filteredWorkoutSplits || []);
-      setWorkoutCategories(workoutCategories || []);
-
-      
-      console.log('data', data);
-      console.log('workoutSplits', workoutSplits);
-      console.log('workoutCategories', workoutCategories);
-   
-      setDaysOfWeek(data || []);
-     }
+  const fetchWorkoutSplits = async () => {
+    const user = await supabase.auth.getUser();
+    // Query workout_splits with related workout_categories
+    const { data: splits, error: workoutSplitsError } = await supabase
+      .from('workout_splits')
+      .select(`
+        *,
+        workout_days(*),
+        workout_categories(*)
+      `).eq('workout_days.user_id', user.data.user?.id as string);
 
 
-     console.log('WORKOUT DAYS', daysOfWeek);
-     fetchWorkoutSplits();
 
+    const { data: categories, error: workoutCategoriesError } = await supabase
+      .from('workout_categories')
+      .select('*');
+
+    setWorkoutSplits(splits as any);
+
+    // Initialize categories with checked status based on existing workout splits
+    if (categories) {
+      setWorkoutCategories(categories);
+    }
+
+    console.log('workoutSplits', workoutSplits);
+    console.log('ERROR', workoutSplitsError);
+  }
+
+
+  useEffect(() => {
+    fetchWorkoutSplits();
   }, []);
 
-  // const [workoutSplits, setWorkoutSplits] = useState<{ id: number, workout: string, checked: boolean }[]>([
-  //   {
-  //     id: 1,
-  //     workout: 'Chest',
-  //     checked: false,
-  //   },
-  //   {
-  //     id: 2,
-  //     workout: 'Back',
-  //     checked: false,
-  //   },
-  //   {
-  //     id: 3,
-  //     workout: 'Legs',
-  //     checked: false,
-  //   },
-  //   {
-  //     id: 4,
-  //     workout: 'Shoulders',
-  //     checked: false,
-  //   },
-  //   {
-  //     id: 5,
-  //     workout: 'Cardio',
-  //     checked: false,
-  //   },
-  //   {
-  //     id: 6,
-  //     workout: 'Rest Day',
-  //     checked: false,
-  //   },
-  //   {
-  //     id: 7,
-  //     workout: 'None',
-  //     checked: false,
-  //   },
-  // ]);
 
 
-  async function handleWorkoutSplit(item: { id: number }) {
+  async function handleWorkoutSplit({ workoutId }: { workoutId: number }) {
     try {
       const user = await supabase.auth.getUser();
-      const selectedWorkoutDay = workoutDays?.find(day => day.id === item.id);
-      const newWorkoutSplit = workoutSplits.filter(split => split.checked).map(split => split.workout).join(', ');
+     
+      console.log('workoutId', workoutId);
 
-      console.log('SELECTED WORKOUT DAY', selectedWorkoutDay);
-      console.log('NEW WORKOUT SPLIT', newWorkoutSplit);
+    console.log('new work out splits', storeWorkoutSplit);
+    const newWorkoutSplits = storeWorkoutSplit.map(item => item.id);
+
+    // First, get or create the workout day
+    const { data: upSertWorkoutDay } = await supabase
+      .from('workout_days')
+      .upsert({ 
+         day: workoutId,
+         user_id: user.data.user?.id as string
+      }, { onConflict: 'day, user_id' }).eq('user_id', user.data.user?.id as string).eq('day', workoutId).select('*').single();
+
+    console.log('upSertWorkoutDay', upSertWorkoutDay);
       
-      if (!selectedWorkoutDay) {
-        console.error('No workout day found');
-        return;
-      }
+    if (upSertWorkoutDay) {
+        const workoutDay = upSertWorkoutDay.id;
 
-      const dayColumn = selectedWorkoutDay.name.toLowerCase() as 'monday' | 'tuesday' | 'wednesday' | 'thursday' | 'friday' | 'saturday' | 'sunday';
+     // Insert new workout splits
+    const workoutSplitInserts = newWorkoutSplits.map(categoryId => ({
+      category_id: categoryId,
+      workout_id: workoutDay
+    }));
+  
+    const { data: newWorkoutSplitsData, error: newWorkoutSplitsError } = await supabase.from('workout_splits').upsert(workoutSplitInserts, { onConflict: 'category_id, workout_id' });
 
-      const { data: existingData, error: selectError } = await supabase
-        .from('workout_split')
-        .select('*')
-        .eq('user_id', user.data.user?.id as string) 
-        .single();
+    
+    console.log('new workout splits', newWorkoutSplitsData);
+    console.log('new workout splits error', newWorkoutSplitsError);
 
-      console.log('EXISTING DATA CHECK:', existingData);
-      console.log('SELECT ERROR:', selectError);
+    setOpenModal(prev => ({ ...prev, [workoutId]: false }));
+    setStoreWorkoutSplit([]);
 
-      let result; 
-      if (existingData) {       
-        console.log('Updating existing record...');
-        result = await supabase
-          .from('workout_split')
-          .update({
-            [dayColumn]: newWorkoutSplit,
-          })
-          .eq('user_id', user.data.user?.id as string);
-      }
-      //if not exisiting data, insert new record 
-      else {
-        result = await supabase
-          .from('workout_split')
-          .insert({
-            user_id: user.data.user?.id as string,
-            [dayColumn]: newWorkoutSplit,
-          });
-      }
-
-      console.log('SUPABASE RESULT:', result);
-      console.log('DATA:', result.data); 
-      console.log('ERROR:', result.error);
-      console.log('STATUS:', result.status);
-      console.log('STATUS TEXT:', result.statusText);
-
-      if (result.error) {
-        console.error('Supabase error:', result.error);
-        return;
-      }
-
-      // Success! Update local state to reflect the change
-      setWorkoutDays(prev => prev.map(day => 
-        day.id === item.id 
-          ? { ...day, workout: newWorkoutSplit || 'No workout selected' }
-          : day
-      ));
-
-      console.log('Successfully saved workout split!');
-      
+    fetchWorkoutSplits();
+  }
     } catch (error) {
       console.error('Error in handleWorkoutSplit:', error);
     }
-  }
+}
+
+console.log('STORE WORKOUT SPLIT', storeWorkoutSplit);
 
 
   return (
@@ -286,15 +269,35 @@ export default function settings() {
               marginVertical: 12,
             }}
             renderItem={({ item }) => (
-              <Pressable onPress={() => setOpenModal(prev => ({ ...prev, [item.id]: !prev[item.id] }))}>
+              <Pressable onPress={() => {
+                // Initialize storeWorkoutSplit with existing data when opening modal
+                const existingSplits = workoutSplits?.filter(split => split.workout_days?.day === item.id) || [];
+                const initialChecked = existingSplits.map(split => ({
+                  id: split.workout_categories?.id!,
+                  checked: true
+                }));
+                setStoreWorkoutSplit(initialChecked);
+                setOpenModal(prev => ({ ...prev, [item.id]: !prev[item.id] }));
+              }}>
                 <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 6, width: '100%', marginBottom: 12 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                     <Text>{item.name}</Text>
 
                     <Text style={{ color: Colors[colorScheme].text['200'] }}>
-                      {workoutSplits?.find(split => split.workout_id === item.id)?.workout_categories?.name || 'None'}
+                      {(() => {
+                        const splits = workoutSplits?.filter(split => split.workout_days?.day === item.id);
+
+                        if (splits && splits.length > 0) {
+                          const categoryNames = splits
+                            .map(split => split.workout_categories?.name)
+                            .filter(Boolean)
+                            .join(', ');
+                          return categoryNames;
+                        }
+                        return 'None';
+                      })()}
                     </Text>
-                   
+
                   </View>
                   {/**Horizontal line */}
                   <View style={{ height: 1, backgroundColor: Colors[colorScheme].text['200'], width: '100%' }} />
@@ -319,7 +322,10 @@ export default function settings() {
                           </Text>
                         </View>
 
-                        <Pressable onPress={() => setOpenModal(prev => ({ ...prev, [item.id]: false }))}>
+                        <Pressable onPress={() => {
+                          setStoreWorkoutSplit([]); // Clear state when closing modal
+                          setOpenModal(prev => ({ ...prev, [item.id]: false }));
+                        }}>
                           <FontAwesome5 name="times" size={20} color={Colors[colorScheme].text} />
                         </Pressable>
                       </View>
@@ -329,16 +335,32 @@ export default function settings() {
                         style={{ flexGrow: 0 }}
                         scrollEnabled={false}
                         keyExtractor={(workoutCategory) => workoutCategory.id.toString()}
-                        data={categories} 
-                        renderItem={({ item: category }) => (
+                        data={workoutCategories}
+                        renderItem={ ({ item: category, index }) => (
+                         
+
                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                             <Checkbox
-                              value={category.checked}
-                              onValueChange={() => {
-                                 setCategories(prev => prev.map(cat => cat.id === category.id ? { ...category, checked: !category.checked } : cat));
+                              value={storeWorkoutSplit.some(split => split.id === category.id) || false}
+                              onValueChange={(checked) => {
+                                console.log('category', category, 'checked:', checked);
+                                console.log('workoutday', item.id);
+
+                                setStoreWorkoutSplit(prev => {
+                                  const exists = prev.some(split => split.id === category.id);
+
+                                  if (checked && !exists) {
+                                    // Add to state if checked and not already present
+                                    return [...prev, { id: category.id, checked: true }];
+                                  } else if (!checked && exists) {
+                                    // Remove from state if unchecked and present
+                                    return prev.filter(split => split.id !== category.id);
+                                  }
+                                  return prev; // No change needed
+                                });  
                               }}
-                              hitSlop={10}
-                              color={category.id === workoutSplits?.find(split => split.workout_id === category.id)?.category_id ? Colors[colorScheme].green[600] : undefined}
+                              hitSlop={12}
+                              color={storeWorkoutSplit.some(split => split.id === category.id) ? Colors[colorScheme].green[600] : undefined}
                             />
                             <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 12 }}>
                               {
@@ -352,16 +374,17 @@ export default function settings() {
                       <View style={styles.buttonWrapper}>
                         <Pressable
                           style={[styles.button, { backgroundColor: 'transparent', borderWidth: 1, borderColor: Colors[colorScheme].pink['600'] }]}
-                          onPress={() => setOpenModal(prev => ({ ...prev, [item.id]: false }))}
+                          onPress={() => {
+                            setStoreWorkoutSplit([]); // Clear state when canceling
+                            setOpenModal(prev => ({ ...prev, [item.id]: false }));
+                          }}
                         >
                           <Text style={[typography.description, { color: Colors[colorScheme].pink['600'] }]}>Cancel</Text>
                         </Pressable>
 
                         <Pressable
                           style={[styles.button, { backgroundColor: Colors[colorScheme].green[600] }]}
-                          onPress={() => {
-                            handleWorkoutSplit({ id: item.id });
-                          }}
+                          onPress={() => handleWorkoutSplit({ workoutId: item.id })}
                         >
                           <Text style={[typography.description, { color: Colors[colorScheme].background }]}>Save</Text>
                         </Pressable>

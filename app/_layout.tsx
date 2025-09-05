@@ -19,8 +19,7 @@ export default function RootLayout() {
   useEffect(() => {
     const handleAuthState = async () => {
       const { data } = await supabase.auth.getSession();
-      console.log('data', data);
-      console.log('Current user:', data.session?.user);
+     
 
       // If user is authenticated and on login page, redirect to tabs
       if (data.session?.user.id && pathname === '/login') {
