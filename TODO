@@ -4,3 +4,4 @@ Todo:
   ☐ Setup firebase sdk
   ☐ 
   
+npx expo run:android
