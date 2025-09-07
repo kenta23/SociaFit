@@ -1,6 +1,6 @@
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import React, { useCallback, useMemo, useRef } from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
@@ -33,8 +33,7 @@ export default function ScrollableBottomSheet() {
   }, []);
 
   // render
-  const renderItem = useCallback(
-    (item) => (
+  const renderItem = useCallback((item) => (
       <View key={item} style={styles.itemContainer}>
         <Text>{item}</Text>
       </View>
@@ -48,12 +47,7 @@ export default function ScrollableBottomSheet() {
 
 
   return (
-    <GestureHandlerRootView style={styles.container}>
-      <Button title="Snap To 90%" onPress={() => handleSnapPress(2)} />
-      <Button title="Collapse" onPress={() => handleCollapsePress()} />
-      <Button title="Snap To 50%" onPress={() => handleSnapPress(1)} />
-      <Button title="Snap To 25%" onPress={() => handleSnapPress(0)} />
-      <Button title="Close" onPress={() => handleClosePress()} />
+    <GestureHandlerRootView>
       <BottomSheet
         ref={sheetRef}
         index={1}
@@ -62,7 +56,7 @@ export default function ScrollableBottomSheet() {
         onChange={handleSheetChange}
       >
         <BottomSheetScrollView contentContainerStyle={styles.contentContainer}>
-          {data.map(renderItem)}
+            {data.map(renderItem)}
         </BottomSheetScrollView>
       </BottomSheet>
     </GestureHandlerRootView>
@@ -74,7 +68,7 @@ export default function ScrollableBottomSheet() {
 const styles = StyleSheet.create({
     container: {
       flex: 1,
-      paddingTop: 200,
+      paddingTop: 100,
     },
     contentContainer: {
       backgroundColor: "white",

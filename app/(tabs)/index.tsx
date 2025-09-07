@@ -5,6 +5,7 @@ import WorkoutTips from '@/components/home/tips';
 import WorkoutSchedule from '@/components/home/workoutschedule';
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
+import { containerStyles } from '@/utils/styles';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
@@ -18,11 +19,8 @@ export default function HomeScreen() {
 
 
   return (
-    <SafeAreaView edges={["top"]}>
-      <ScrollView style={[
-          styles.container,
-          { backgroundColor: Colors[colorScheme].background },
-        ]}
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors[colorScheme].background }} edges={["top"]}>
+      <ScrollView style={containerStyles.container}
       >
         {/**User Profile */}
         <View style={{ marginTop: 16 }}>
@@ -66,11 +64,6 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
- container: { 
-    minHeight: '100%',
-    width: '100%',
-    paddingHorizontal: 24,
-  },
  userImage: {
   borderRadius: 100,
   width: 40,

@@ -1,8 +1,9 @@
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
+import { supabase } from '@/utils/supabase';
 import { Image } from 'expo-image';
 import { Pedometer } from 'expo-sensors';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { PieChart } from 'react-native-gifted-charts';
 import StepsAndCalories from './stepsAndCalories';
@@ -18,41 +19,72 @@ interface StepsCountProps {
 }
 
 export default function StepsCount() {
-    const [currentSteps] = useState(300);
+    const [currentSteps, setCurrentSteps] = useState<number>(0);
     const [targetSteps] = useState(2700);
     const colorScheme = useColorScheme() ?? 'light';
     const footstepsIcon = require('@/assets/images/footsteps.svg');
-    const [pastStepCount, setPastStepCount] = useState(0);
+    const [pastStepCount, setPastStepCount] = useState<number>(0);
 
     const [stepsCountData] = useState<StepData[]>([
         {value: 70, color: Colors[colorScheme].primary},
         {value: 30, color: 'lightgray'}
     ]);
 
-    const watchSteps = async () => {
-       const PedometerIsAvailable = await Pedometer.isAvailableAsync();
+    const subscribe = async () => {
+      const isAvailable = await Pedometer.isAvailableAsync();
+      console.log('isAvailable', isAvailable);
 
-       if (PedometerIsAvailable) { 
-           const end = new Date();
-           const start = new Date();
-           
-           // Set start time to midnight today
-           start.setHours(0, 0, 0, 0);
-           
-           // Set end time to midnight tomorrow
-           end.setHours(23, 59, 59, 999);
 
-           console.log('Tracking steps from:', start.toISOString(), 'to:', end.toISOString());
+      const user = await supabase.auth.getUser();
 
-           const pastStepCountResult = await Pedometer.getStepCountAsync(start, end);
-           if (pastStepCountResult) {
-             setPastStepCount(pastStepCountResult.steps);
-           }
-       }
-    }
+      if (isAvailable) {
+        const end = new Date();
+        const start = new Date();
+        start.setDate(end.getDate() - 1);
 
-    const progressPercentage = Math.round((currentSteps / targetSteps) * 100);
+        //weekly steps count
+        start.setDate(start.getDate() - start.getDay());
+        const endOfWeek = new Date();
+        endOfWeek.setDate(endOfWeek.getDate() - endOfWeek.getDay() + 6);
+  
+        const pastStepCountResult = await Pedometer.getStepCountAsync(start, end);
+        const weeklyStepCountResult = await Pedometer.getStepCountAsync(start, endOfWeek);
+       
 
+        if (pastStepCountResult) {
+            setPastStepCount(pastStepCountResult.steps);
+         }
+
+         
+        if (weeklyStepCountResult) {
+          const { data, error } = await supabase.from('userdata').upsert({
+            user_id: user.data.user?.id as string,
+            weekly_steps: weeklyStepCountResult.steps,
+          }, { onConflict: 'user_id' }).eq('user_id', user.data.user?.id as string).select('*').single();
+
+           console.log('weeklyStepCountResult', data);
+           console.log('weeklyStepCountResult error', error?.message);
+        }
+  
+        return Pedometer.watchStepCount(result => {
+          setCurrentSteps(result.steps);
+        });
+      }
+    };
+
+  useEffect(() => {
+    (async () => {
+      const subscription = await subscribe();
+      return () => subscription && subscription.remove();
+    })()
+
+  }, []);
+
+  console.log('currentSteps', currentSteps);
+  console.log('pastStepCount', pastStepCount);
+
+    
+    
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.frameParent}>

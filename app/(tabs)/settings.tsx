@@ -1,17 +1,16 @@
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
 import { Database } from '@/database.types';
+import { containerStyles } from '@/utils/styles';
 import { supabase } from '@/utils/supabase';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import BottomSheet from '@gorhom/bottom-sheet';
 import Checkbox from 'expo-checkbox';
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
+import { Href, Link } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import ScrollableBottomSheet from '../scrollable-bottomsheet';
 
 
 
@@ -219,10 +218,8 @@ console.log('workout categories', workoutCategories);
 
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors[colorScheme].background }} edges={["top"]}>
-      <GestureHandlerRootView>
-        <ScrollView style={styles.container}>
-
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors[colorScheme].background }}>
+        <ScrollView style={[containerStyles.container]}>
           <View style={{ gap: 12 }}>
             <Pressable style={[styles.profileBtn, { backgroundColor: Colors[colorScheme].frameBackground }]}>
               {/* Profile */}
@@ -394,8 +391,7 @@ console.log('workout categories', workoutCategories);
             />
 
             {/**Other settings */}
-
-            <View style={{ gap: 4, alignItems: 'flex-start' }}>
+            <View style={{ alignItems: 'flex-start' }}>
               <Text style={[typography.heading, { textAlign: 'left' }]}>
                 Others
               </Text>
@@ -429,7 +425,7 @@ console.log('workout categories', workoutCategories);
 
                 return (
                   <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 8, width: '100%', marginBottom: 12 }}>
-                    <Link href={route as any}>
+                    <Link style={{ gap: 8 }} href={route as any as Href}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                         <Text>{item}</Text>
                       </View>
@@ -444,12 +440,8 @@ console.log('workout categories', workoutCategories);
               }
               }
             />
-
-
-            <ScrollableBottomSheet />
           </View>
         </ScrollView>
-        </GestureHandlerRootView>
       </SafeAreaView>
 
   )
@@ -457,10 +449,6 @@ console.log('workout categories', workoutCategories);
 
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-  },
   buttonWrapper: {
     flexDirection: 'row',
     gap: 12,
