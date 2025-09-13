@@ -1,8 +1,43 @@
 import { typography } from '@/constants/typography';
-import React from 'react';
+import { Database } from '@/database.types';
+import { supabase } from '@/utils/supabase';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { readRecord } from 'react-native-health-connect';
 
-export default function StepsAndCalories() {
+export default function StepsAndCalories( { data }: { data: Database['public']['Tables']['userdata']['Row'] | null }) {
+   const [weight, setWeight] = useState<number>(0);
+  /*60 kg → ~0.04 kcal/step
+
+80 kg → ~0.05 kcal/step
+
+100 kg → ~0.06 kcal/step*/
+//Calories=Distance(km)×Weight(kg)×0.5 to 0.7
+  const caloriesPerStep: number = weight === 60 ? 0.04 : weight === 80 ? 0.05 : weight === 100 ? 0.06 : 0;
+  const caloriesBurnt: number = useMemo(() =>  data?.today_steps ? data.today_steps * (data?.ds_travelled ?? 0) * caloriesPerStep : 0, [data?.today_steps, caloriesPerStep]);
+
+  //get data from health connect Api 
+  const readDataFromHealthConnect = async () => { 
+    readRecord('ActiveCaloriesBurned', '').then((result) => {
+      console.log('Retrieved record: ', JSON.stringify({ result }, null, 2));
+    });
+  }
+
+useEffect(() => {
+   async function getData() {
+    const user = await supabase.auth.getUser();
+    const { data: healthDetailsData, error: healthDetailsError } = await supabase.from('health_details').select('*').eq('user_id', user.data.user?.id as string).single();
+    if (healthDetailsData) {
+      setWeight(healthDetailsData.weight ?? 0);
+    }
+    if (healthDetailsError) {
+      console.log('healthDetailsError', healthDetailsError?.message);
+    }
+  }
+   getData();
+}, []);
+
+
   return (
     <View style={styles.container}>
       {/** Steps count */}
@@ -12,7 +47,7 @@ export default function StepsAndCalories() {
             <Text
               style={[typography.description, styles.todayClr]}
             >{`Steps count `}</Text>
-            <Text style={[typography.heading, styles.text]}>1200</Text>
+            <Text style={[typography.heading, styles.text]}>{data?.today_steps ?? 0}</Text>
           </View>
           <Text style={[typography.medium, styles.todayClr]}>Today</Text>
         </View>
@@ -25,7 +60,7 @@ export default function StepsAndCalories() {
             <Text style={[typography.description, styles.todayClr]}>
               Calories burnt
             </Text>
-            <Text style={[typography.heading, styles.text]}>539</Text>
+            <Text style={[typography.heading, styles.text]}>{caloriesBurnt}</Text>
           </View>
           <Text style={[typography.medium, styles.todayClr]}>kCal</Text>
         </View>

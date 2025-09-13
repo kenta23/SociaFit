@@ -150,6 +150,7 @@ export type Database = {
           monthly_steps: number | null
           qr_code: string | null
           steps_goal: number | null
+          streaks: number | null
           today_steps: number | null
           user_id: string | null
           weekly_steps: number | null
@@ -161,6 +162,7 @@ export type Database = {
           monthly_steps?: number | null
           qr_code?: string | null
           steps_goal?: number | null
+          streaks?: number | null
           today_steps?: number | null
           user_id?: string | null
           weekly_steps?: number | null
@@ -172,6 +174,7 @@ export type Database = {
           monthly_steps?: number | null
           qr_code?: string | null
           steps_goal?: number | null
+          streaks?: number | null
           today_steps?: number | null
           user_id?: string | null
           weekly_steps?: number | null

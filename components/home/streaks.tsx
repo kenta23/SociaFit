@@ -1,9 +1,28 @@
+import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
+import { supabase } from '@/utils/supabase';
 import { Image } from 'expo-image';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, Text, useColorScheme, View } from 'react-native';
 
 export default function Streaks() {
+  const [streakCount, setStreakCount] = useState<number>(0);
+  const colorScheme = useColorScheme() ?? 'light';
+
+
+  useEffect(() => { 
+       async function getData() { 
+          const user = await supabase.auth.getUser();
+          const { data: userData, error: userError } = await supabase.from('userdata').select('*').eq('user_id', user.data.user?.id as string).single();
+          if (userData) {
+            setStreakCount(userData.streaks || 0);
+          }
+          if (userError) {
+            console.log('userError', userError);
+          }
+        }
+      getData();
+  }, [])
   
   const streakDescription = (count: number): string => { 
      if(count === 0) { 
@@ -24,12 +43,12 @@ export default function Streaks() {
     <View style={styles.frameParent}>
       <View style={styles.frameWrapper}>
         <View style={styles.mdifireParent}>
-          <Image contentFit='contain' source={require('@/assets/images/mdi_fire.svg')} style={styles.mdifireIcon}/>
-          <Text style={styles.streakCount}>49</Text>
+          <Image contentFit='contain' source={streakCount > 0 ? require('@/assets/images/mdi_fire.svg') : require('@/assets/images/fire_gray.png')} style={styles.mdifireIcon}/>
+          <Text style={[styles.streakCount,  { color: streakCount > 0 ? '#e35420' : Colors[colorScheme].text['50'] }]}>{streakCount}</Text>
         </View>
       </View>
       <Text style={typography.subheading}>
-        You made straight 49 streaks, keep it up!
+        {streakDescription(streakCount)}
       </Text>
     </View>
   );
@@ -45,7 +64,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "700",
     fontFamily: "Inter-Bold",
-    color: "#e35420",
     textAlign: "center",
   },
   mdifireParent: {

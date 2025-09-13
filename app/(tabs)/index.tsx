@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function HomeScreen() {
   const colorScheme = useColorScheme() ?? 'light';
   const router = useRouter();
+  
 
 
   return (
@@ -26,7 +27,7 @@ export default function HomeScreen() {
         <View style={{ marginTop: 16 }}>
           <Pressable
             style={styles.frameParent}
-            onPress={() => router.push("/profile")}
+            onPress={() => router.push("/profile")} 
           >
             <Image
               source={require("@/assets/images/user-default.png")}

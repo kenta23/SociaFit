@@ -46,10 +46,22 @@
         {
           "ios": {
             "useFrameworks": "static"
+          },
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 26,
+            "permissions": [
+              "android.permission.health.READ_STEPS",
+              "android.permission.health.WRITE_STEPS",
+              "android.permission.health.READ_ACTIVE_CALORIES_BURNED",
+              "android.permission.health.READ_DISTANCE"
+            ]
           }
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-health-connect"
     ],
     "experiments": {
       "typedRoutes": true
