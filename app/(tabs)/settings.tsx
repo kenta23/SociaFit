@@ -424,9 +424,9 @@ console.log('workout categories', workoutCategories);
 
 
                 return (
-                  <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 8, width: '100%', marginBottom: 12 }}>
-                    <Link style={{ gap: 8 }} href={route as any as Href}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                  <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%', marginBottom: 12 }}>
+                    <Link style={{ gap: 12, marginBottom: 6 }} href={route as any as Href}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
                         <Text>{item}</Text>
                       </View>
 

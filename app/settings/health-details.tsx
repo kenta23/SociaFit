@@ -29,6 +29,8 @@ export default function HealthDetails () {
     const user = await supabase.auth.getUser();
     const { data, error } = await supabase.from('health_details').select('*').eq('user_id', user.data.user?.id as string).single();
      
+    console.log('HEALTH data', data);
+  
 
     if (data) { 
       setHealthDetails(data);

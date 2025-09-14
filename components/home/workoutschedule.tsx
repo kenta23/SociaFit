@@ -1,72 +1,85 @@
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
+import { Database } from '@/database.types';
+import { supabase } from '@/utils/supabase';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, useColorScheme, View } from 'react-native';
 
 
-const days = [{
-  day: 'Monday',
-  isWorkout: true,
-},
-{
-  day: 'Tuesday',
-  isWorkout: true,
-},
-{
-  day: 'Wednesday',
-  isWorkout: true,
-},
-{
-  day: 'Thursday',
-  isWorkout: false,
-},
-{
-  day: 'Friday',
-  isWorkout: true,
-},
-{
-  day: 'Saturday',
-  isWorkout: false,
-},
-{
-  day: 'Sunday',
-  isWorkout: false,
-},
-];
+const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
 export default function WorkoutSchedule() {
   const colorScheme = useColorScheme() ?? 'light';
+  const [data, setData] = useState<(Database['public']['Tables']['workout_days']['Row'] & { days_of_week: Database['public']['Tables']['days_of_week']['Row'] })[]>([]);
+  const [workoutSplits, setWorkoutSplits] = useState<(Database['public']['Tables']['workout_splits']['Row'] & { workout_days: Database['public']['Tables']['workout_days']['Row'] })[]>([]);
+ 
+
+  useEffect(() => { 
+      async function getData() {  
+          const user = await supabase.auth.getUser();
+          const { data: workoutDays, error: workoutDaysError } = await supabase.from('workout_days').select('*, days_of_week(*)').eq('user_id', user.data.user?.id as string);
+          const { data: workoutSplits, error: workoutSplitsError } = await supabase
+            .from('workout_splits')
+            .select('*, workout_days(*)')
+            .eq('workout_days.user_id', user.data.user?.id as string);
+
+          if (workoutSplits) {
+            // Filter out any workoutSplits where workout_days is null to satisfy the type
+            setWorkoutSplits(
+              workoutSplits.filter(
+                (split): split is typeof split & { workout_days: NonNullable<typeof split.workout_days> } =>
+                  split.workout_days !== null
+              )
+            );
+          }
+          if (workoutSplitsError) {
+            console.log('workoutSplitsError', workoutSplitsError);
+          }
+         if (workoutDays) {
+            setData(workoutDays);
+          }
+          if (workoutDaysError) {
+            console.log('workoutDaysError', workoutDaysError);
+          }
+      }
+      getData();
+      }, []);
+
   return (
       <View style={styles.parent}>
         <Text style={typography.heading}>Workout Schedule</Text>  
 
 
         <View style={styles.inner}>
-            {days.map((dayObj, index) => (
-              <View
-                key={dayObj.day}
-                style={[
-                  styles.frameWrapper,
-                  dayObj.isWorkout ? {
-                    borderColor: Colors[colorScheme].green[600],
-                  } : {
-                    borderColor: Colors[colorScheme].pink[600],
-                  },
-                ]}
-              >
-                <View style={[styles.item]}>
-                  {dayObj.isWorkout ? (
-                    <MaterialCommunityIcons name="arm-flex" size={20} color={Colors[colorScheme].green[600]} />
-                  ) : (
-                    <FontAwesome6 name="x" size={20} color={Colors[colorScheme].pink[600]} />
-                  )}
-                  <Text style={[typography.description, {
-                    color: dayObj.isWorkout ? Colors[colorScheme].green[600] : Colors[colorScheme].pink[600],
-                  }]}>{dayObj.day}</Text>
+            {days.map((dayName, index) => {
+              const isWorkoutDay = workoutSplits.find((day) => day.workout_days?.day === index + 1);
+               return (
+                <View
+                  key={index}
+                  style={[
+                    styles.frameWrapper,
+                    isWorkoutDay ? {
+                      borderColor: Colors[colorScheme].green[600],
+                    } : {
+                      borderColor: Colors[colorScheme].pink[600],
+                    },
+                  ]}
+                >
+                  <View style={[styles.item]}>                  
+                    {isWorkoutDay ? (
+                      <MaterialCommunityIcons name="arm-flex" size={20} color={Colors[colorScheme].green[600]} />
+                    ) : (
+                      <FontAwesome6 name="x" size={20} color={Colors[colorScheme].pink[600]} />
+                    )}
+                    <Text style={[typography.description, {
+                      color: isWorkoutDay ? Colors[colorScheme].green[600] : Colors[colorScheme].pink[600],
+                    }]}>{dayName}</Text>
+                  </View>
                 </View>
-              </View>
-            ))}
+              );
+            })}
        </View>
         </View>
   )

@@ -3,12 +3,14 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useStoreData } from '@/utils/states';
+import { supabase } from '@/utils/supabase';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image } from 'expo-image';
 import { Tabs, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Platform, Pressable } from 'react-native';
 
 
@@ -17,6 +19,28 @@ import { Platform, Pressable } from 'react-native';
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
+  const { storeData, data } = useStoreData();
+
+
+  console.log('data from zustand', data);
+
+
+  useEffect(() => {
+      async function getData() { 
+        const user = await supabase.auth.getUser();
+        if(user.data.user?.id) {          
+          const { data, error } = await supabase.from('userdata').select('*').eq('user_id', user.data.user?.id as string).single();
+          if(data) { 
+            storeData(data);
+          }
+          if(error) { 
+            console.log('error', error);
+          }
+        }
+      }
+
+      getData();
+  }, [])
 
   return (
     <Tabs

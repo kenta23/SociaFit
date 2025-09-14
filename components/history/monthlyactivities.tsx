@@ -1,18 +1,23 @@
+import { supabase } from '@/utils/supabase';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from "expo-image";
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
 import * as React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 
 
 export default function MonthlyActivities() {
-  	
+  	const router = useRouter();
   	return ( 
     		<View style={styles.parent}>
       			<View style={styles.view}>
         				<Text style={[styles.title]}>Monthly Activities</Text>
 
+                     <Pressable onPress={() => { 
+						 supabase.auth.signOut();
+						 router.replace('/login');
+					 }}><Text>Sign out</Text></Pressable>
 
                    {/**Map activities here */}
         			<Link href="/">      

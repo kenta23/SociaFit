@@ -1,6 +1,7 @@
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
 import { Database } from '@/database.types';
+import { useStoreData, useStoreStepsCount } from '@/utils/states';
 import { supabase } from '@/utils/supabase';
 import { Image } from 'expo-image';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -11,8 +12,7 @@ import {
   initialize,
   readRecords,
   RecordResult,
-  requestPermission,
-  SdkAvailabilityStatus,
+  requestPermission
 } from 'react-native-health-connect';
 import StepsAndCalories from './stepsAndCalories';
 
@@ -31,11 +31,11 @@ interface StepsCountProps {
 }
 
 export default function StepsCount() {
-    const [currentSteps, setCurrentSteps] = useState<number>(0);
-    const [targetSteps, setTargetSteps] = useState<number>(0);
     const colorScheme = useColorScheme() ?? 'light';
     const [pastStepCount, setPastStepCount] = useState<number>(0);
-    const [data, setData] = useState<Database['public']['Tables']['userdata']['Row'] | null>(null);
+    // const [data, setData] = useState<Database['public']['Tables']['userdata']['Row'] | null>(null);
+    const { data: userData, storeData } = useStoreData();
+    const { setTargetSteps, setCurrentSteps, targetSteps, currentSteps } = useStoreStepsCount();
     
 
     // Helper function to calculate date ranges
@@ -44,13 +44,13 @@ export default function StepsCount() {
       
       // Today (start of day to end of day)
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000 - 1);
+      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000 - 1); //miliseconds 
       
       // This week (Monday to Sunday)
       const startOfWeek = new Date(startOfDay);
       const dayOfWeek = startOfWeek.getDay();
       const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust for Sunday
-      startOfWeek.setDate(startOfWeek.getDate() + daysToMonday);
+      startOfWeek.setDate(startOfWeek.getDate() + daysToMonday); //start at monday
       
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(endOfWeek.getDate() + 6);
@@ -69,28 +69,16 @@ export default function StepsCount() {
     };
 
     // Helper function to calculate total steps from Health Connect records
-    const calculateTotalSteps = (records: RecordResult<"Steps">[]): number => {
-      return records.reduce((total, record) => {
+    const calculateTotalSteps = (records: RecordResult<"Steps">[]): number => records.reduce((total, record) => {
         return total + (record.count || 0);
       }, 0);
-    };
 
     // Helper function to update streaks
     const updateStreaks = async (userId: string, todaySteps: number, stepGoal: number) => {
       try {
-        // Get current user data
-        const { data: userData, error: fetchError } = await supabase
-          .from('userdata')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
 
-        if (fetchError) {
-          console.log('Error fetching user data for streaks:', fetchError);
-          return 0;
-        }
-
-        const currentStreaks = (userData as any)?.streaks || 0;
+        // Get current user data from store
+        const currentStreaks = userData?.streaks || 0;
         const goalMet = todaySteps >= stepGoal;
         
         let newStreaks = 0;
@@ -101,10 +89,16 @@ export default function StepsCount() {
         }
 
         // Update streaks in database
-        const { error: updateError } = await supabase
+        const { data: updateData, error: updateError } = await supabase
           .from('userdata')
-          .update({ streaks: newStreaks } as any)
-          .eq('user_id', userId);
+          .update({ streaks: newStreaks })
+          .eq('user_id', userId)
+          .select('*')
+          .single();
+
+          if(updateData) { 
+            storeData(updateData as Database['public']['Tables']['userdata']['Row']);
+          }
 
         if (updateError) {
           console.log('Error updating streaks:', updateError);
@@ -113,6 +107,7 @@ export default function StepsCount() {
 
         console.log(`Streaks updated: ${currentStreaks} -> ${newStreaks} (Goal met: ${goalMet})`);
         return newStreaks;
+
       } catch (error) {
         console.log('Error in updateStreaks:', error);
         return 0;
@@ -125,27 +120,22 @@ export default function StepsCount() {
         // Check SDK status first
         const status = await getSdkStatus();
         console.log('Health Connect SDK Status:', status);
+      
         
-        if (status === SdkAvailabilityStatus.SDK_UNAVAILABLE) {
-          console.log('Health Connect SDK is not available on this device');
-          Alert.alert('Health Connect Unavailable', 'Health Connect is not available on this device. Please install Health Connect app.');
-          return;
-        }
-        
-        if (status === SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) {
-          console.log('Health Connect provider update required');
-          Alert.alert(
-            'Update Required', 
-            'Please update Health Connect app to the latest version from Google Play Store.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Open Play Store', onPress: () => {
-                console.log('User should update Health Connect app');
-              }}
-            ]
-          );
-          return;
-        }
+        // if (status === SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) {
+        //   console.log('Health Connect provider update required');
+        //   Alert.alert(
+        //     'Update Required', 
+        //     'Please update Health Connect app to the latest version from Google Play Store.',
+        //     [
+        //       { text: 'Cancel', style: 'cancel' },
+        //       { text: 'Open Play Store', onPress: () => {
+        //         console.log('User should update Health Connect app');
+        //       }}
+        //     ]
+        //   );
+        //   return;
+        // }
 
         // Initialize the health connect client
         const isInitialized = await initialize();
@@ -164,20 +154,20 @@ export default function StepsCount() {
         console.log('Permission request result:', grantedPermissions);
     
         // Check if permissions were granted
-        if (!grantedPermissions || (Array.isArray(grantedPermissions) && grantedPermissions.length === 0)) {
-          console.log('No permissions granted');
-          Alert.alert(
-            'Permissions Required', 
-            'Health Connect permissions are required to read your health data. Please grant permissions in the Health Connect app.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Open Health Connect', onPress: () => {
-                console.log('User should open Health Connect app to grant permissions');
-              }}
-            ]
-          );
-          return;
-        }
+        // if (!grantedPermissions || (Array.isArray(grantedPermissions) && grantedPermissions.length === 0)) {
+        //   console.log('No permissions granted');
+        //   Alert.alert(
+        //     'Permissions Required', 
+        //     'Health Connect permissions are required to read your health data. Please grant permissions in the Health Connect app.',
+        //     [
+        //       { text: 'Cancel', style: 'cancel' },
+        //       { text: 'Open Health Connect', onPress: () => {
+        //         console.log('User should open Health Connect app to grant permissions');
+        //       }}
+        //     ]
+        //   );
+        //   return;
+        // }
 
         // Get user data
         const user = await supabase.auth.getUser();
@@ -227,25 +217,13 @@ export default function StepsCount() {
           month: monthlySteps
         });
 
-        // Get user's step goal
-        const { data: userData, error: userError } = await supabase
-          .from('userdata')
-          .select('steps_goal')
-          .eq('user_id', userId)
-          .single();
-
-        if (userError) {
-          console.log('Error fetching user data:', userError);
-          return;
-        }
-
         const stepGoal = userData?.steps_goal || 0; // Default goal
 
         // Update streaks
         const newStreaks = await updateStreaks(userId, todaySteps, stepGoal);
 
         // Update database with all step data
-        const { error: updateError } = await supabase
+        const { data: updateData, error: updateError } = await supabase
           .from('userdata')
           .upsert({
             user_id: userId,
@@ -253,7 +231,13 @@ export default function StepsCount() {
             weekly_steps: weeklySteps,
             monthly_steps: monthlySteps,
             streaks: newStreaks,
-          } as any, { onConflict: 'user_id' });
+          } as any, { onConflict: 'user_id' })
+          .select('*')
+          .single();
+
+        if(updateData) { 
+          storeData(updateData as Database['public']['Tables']['userdata']['Row']);
+        }
 
         if (updateError) {
           console.log('Error updating step data:', updateError);
@@ -287,47 +271,6 @@ export default function StepsCount() {
 
 
 
-    // Function to load user data from database
-    const loadUserData = async () => {
-      try {
-        const user = await supabase.auth.getUser();
-        if (!user.data.user?.id) return;
-
-        const { data, error } = await supabase
-          .from('userdata')
-          .select('*')
-          .eq('user_id', user.data.user.id)
-          .single();
-
-        if (data) {
-          setTargetSteps(data.steps_goal || 0);
-          setCurrentSteps(data.today_steps || 0);
-          setData(data as Database['public']['Tables']['userdata']['Row']);
-          console.log('User data loaded:', data);
-        }
-        else if (!data) { 
-           const { data: healthDetailsData, error: healthDetailsError } = await supabase.from('userdata').insert({ 
-            user_id: user.data.user.id,
-           }).select('*').single();
-           if (healthDetailsData) { 
-            setTargetSteps(healthDetailsData.steps_goal || 0);
-            setCurrentSteps(healthDetailsData.today_steps || 0);
-
-
-            setData(healthDetailsData as Database['public']['Tables']['userdata']['Row']);
-           }
-           else if (healthDetailsError) { 
-            console.log('Error loading user data:', healthDetailsError);
-           }
-        }
-        else if (error) {
-          console.log('Error loading user data:', error);
-        }
-      } catch (error) {
-        console.log('Error in loadUserData:', error);
-      }
-    };
-
     // Function to set up periodic updates
     const setupPeriodicUpdates = () => {
       // Update steps data every 5 minutes
@@ -345,9 +288,6 @@ export default function StepsCount() {
     };
 
   useEffect(() => {
-    // Load initial user data
-    loadUserData();
-    
     // Initialize Health Connect integration
     healthConnectIntegration();
     
@@ -405,7 +345,7 @@ export default function StepsCount() {
                 { color: Colors[colorScheme].text["0"] },
               ]}
             >
-              {data?.streaks ? `🔥 ${data.streaks} day streak!` : 'Start making today!'}
+              {userData?.streaks ? `🔥 ${userData.streaks} day streak!` : 'Start making today!'}
             </Text>
           </View>
         </View>
@@ -418,7 +358,7 @@ export default function StepsCount() {
       {/** Steps count details  */}
       {/**pass props here */}
          <StepsAndCalories 
-           data={data}
+           data={userData}
          />
     </View>
   );
