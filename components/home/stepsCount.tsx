@@ -120,22 +120,7 @@ export default function StepsCount() {
         // Check SDK status first
         const status = await getSdkStatus();
         console.log('Health Connect SDK Status:', status);
-      
-        
-        // if (status === SdkAvailabilityStatus.SDK_UNAVAILABLE_PROVIDER_UPDATE_REQUIRED) {
-        //   console.log('Health Connect provider update required');
-        //   Alert.alert(
-        //     'Update Required', 
-        //     'Please update Health Connect app to the latest version from Google Play Store.',
-        //     [
-        //       { text: 'Cancel', style: 'cancel' },
-        //       { text: 'Open Play Store', onPress: () => {
-        //         console.log('User should update Health Connect app');
-        //       }}
-        //     ]
-        //   );
-        //   return;
-        // }
+
 
         // Initialize the health connect client
         const isInitialized = await initialize();
@@ -152,22 +137,7 @@ export default function StepsCount() {
         ]);
 
         console.log('Permission request result:', grantedPermissions);
-    
-        // Check if permissions were granted
-        // if (!grantedPermissions || (Array.isArray(grantedPermissions) && grantedPermissions.length === 0)) {
-        //   console.log('No permissions granted');
-        //   Alert.alert(
-        //     'Permissions Required', 
-        //     'Health Connect permissions are required to read your health data. Please grant permissions in the Health Connect app.',
-        //     [
-        //       { text: 'Cancel', style: 'cancel' },
-        //       { text: 'Open Health Connect', onPress: () => {
-        //         console.log('User should open Health Connect app to grant permissions');
-        //       }}
-        //     ]
-        //   );
-        //   return;
-        // }
+  
 
         // Get user data
         const user = await supabase.auth.getUser();
@@ -251,7 +221,7 @@ export default function StepsCount() {
 
       } catch (error) {
         console.error('Error in healthConnectIntegration:', error);
-        Alert.alert('Error', `Failed to read health data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        // Alert.alert('Error', `Failed to read health data: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
 

@@ -1,11 +1,12 @@
 import { Colors } from "@/constants/Colors";
 import { typography } from "@/constants/typography";
 import { Database } from "@/database.types";
+import { useStoreHealthDetails } from "@/utils/states";
 import { containerStyles } from "@/utils/styles";
 import { supabase } from "@/utils/supabase";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Image } from "expo-image";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { Alert, FlatList, Pressable, StyleSheet, Text, useColorScheme, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,29 +23,8 @@ export default function HealthDetails () {
   const colorScheme = useColorScheme() ?? 'light';
   const bottomSheetRef = useRef<BottomSheet>(null);  
   const [storeBottomSheetContent, setStoreBottomSheetContent] = useState<{ id: number, value: number[] | string[] }[]>([{ id: 0, value: [] }]);
-  const [healthDetails, setHealthDetails] = useState<Database['public']['Tables']['health_details']['Row'] | null>(null);
-
-
-  const fetchHealthDetails = async () => { 
-    const user = await supabase.auth.getUser();
-    const { data, error } = await supabase.from('health_details').select('*').eq('user_id', user.data.user?.id as string).single();
-     
-    console.log('HEALTH data', data);
-  
-
-    if (data) { 
-      setHealthDetails(data);
-    }
-    if(error) {  
-      Alert.alert('Error!', error.message.toString());
-    }
-  }
-
-  console.log('healthDetails', healthDetails);
-
-  useEffect(() => { 
-    fetchHealthDetails();
-  }, [])
+  const { healthDetails, setHealthDetails } = useStoreHealthDetails();
+ 
 
 
   function handleBottomSHeetContent(index: number) {
@@ -136,7 +116,7 @@ export default function HealthDetails () {
       if (data) { 
         Alert.alert('Success!', 'Health details updated');
         bottomSheetRef.current?.close();
-        fetchHealthDetails();
+        setHealthDetails(data as Database['public']['Tables']['health_details']['Row']);
       }
 
       if (error) { 

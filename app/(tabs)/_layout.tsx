@@ -2,8 +2,9 @@ import { HapticTab } from '@/components/HapticTab';
 import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
+import { Database } from '@/database.types';
 import { useColorScheme } from '@/hooks/useColorScheme';
-import { useStoreData } from '@/utils/states';
+import { useStoreData, useStoreHealthDetails, useStoreWorkoutSplits } from '@/utils/states';
 import { supabase } from '@/utils/supabase';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -13,13 +14,15 @@ import { Tabs, useRouter } from 'expo-router';
 import React, { useEffect } from 'react';
 import { Platform, Pressable } from 'react-native';
 
-
+type WorkoutSplitType = (Database['public']['Tables']['workout_splits']['Row'] & { workout_days: Database['public']['Tables']['workout_days']['Row'] } & { workout_categories: Database['public']['Tables']['workout_categories']['Row']})[];
 
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const { storeData, data } = useStoreData();
+  const { categories, setCategories, workoutSplits, setWorkoutSplits} = useStoreWorkoutSplits();
+  const { healthDetails, setHealthDetails } = useStoreHealthDetails();
 
 
   console.log('data from zustand', data);
@@ -28,8 +31,32 @@ export default function TabLayout() {
   useEffect(() => {
       async function getData() { 
         const user = await supabase.auth.getUser();
+  
+
         if(user.data.user?.id) {          
           const { data, error } = await supabase.from('userdata').select('*').eq('user_id', user.data.user?.id as string).single();
+          const { data: splits, error: workoutSplitsError } = await supabase
+          .from('workout_splits')
+          .select(`
+            *,
+            workout_days(*),
+            workout_categories(*)
+          `).eq('workout_days.user_id', user.data.user?.id as string);
+          setWorkoutSplits(splits as WorkoutSplitType);
+    
+    
+        const { data: categories, error: workoutCategoriesError } = await supabase
+          .from('workout_categories')
+          .select('*');
+        // Initialize categories with checked status based on existing workout splits
+        if (categories) {
+          setCategories(categories as (Database['public']['Tables']['workout_categories']['Row'][]));
+        }
+        const { data: healthDetails, error: healthDetailsError } = await supabase.from('health_details').select('*').eq('user_id', user.data.user?.id as string).single();
+       
+        if(healthDetails) { 
+          setHealthDetails(healthDetails as Database['public']['Tables']['health_details']['Row']);
+        }
           if(data) { 
             storeData(data);
           }

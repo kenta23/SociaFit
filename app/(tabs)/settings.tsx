@@ -1,17 +1,18 @@
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
-import { Database } from '@/database.types';
+import { useBottomSheet } from '@/library/bottomsheetprovider';
+import { useStoreWorkoutSplits } from '@/utils/states';
 import { containerStyles } from '@/utils/styles';
 import { supabase } from '@/utils/supabase';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import BottomSheet from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import Checkbox from 'expo-checkbox';
 import { Image } from 'expo-image';
-import { Href, Link } from 'expo-router';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
+import ChangeStepGoal from '../settings/change-step-goal';
+import HealthDetails from '../settings/health-details';
 
 
 
@@ -49,18 +50,21 @@ export default function settings() {
     },
   ]);
 
-  const [workoutSplits, setWorkoutSplits] = useState<any[] | null>([]);
-  const [workoutCategories, setWorkoutCategories] = useState<Database['public']['Tables']['workout_categories']['Row'][] | null>([]);
+  // const [workoutSplits, setWorkoutSplits] = useState<any[] | null>([]);
+  // const [workoutCategories, setWorkoutCategories] = useState<Database['public']['Tables']['workout_categories']['Row'][] | null>([]);
   const [storeWorkoutSplit, setStoreWorkoutSplit] = useState<{id: number, checked: boolean}[]>([]);
-
+  const { workoutSplits, setWorkoutSplits, setCategories, categories } = useStoreWorkoutSplits();
   const bottomSheetRef = useRef<BottomSheet>(null);
-
-  // callbacks
-  const handleSheetChanges = useCallback((index: number) => {
-    console.log('handleSheetChanges', index);
-  }, []);
+  const [activeSheet, setActiveSheet] = useState<'Health Details' | 'Change Step Goal' | 'Unit Measure' | null>(null);
+  const { open } = useBottomSheet();
 
 
+  const snapPoints = useMemo(() => ["50%", "75%", "100%"], []);
+
+
+  console.log('workoutSplitsState', workoutSplits);
+
+  
   const fetchWorkoutSplits = async () => {
     const user = await supabase.auth.getUser();
     // Query workout_splits with related workout_categories
@@ -82,10 +86,9 @@ export default function settings() {
 
     // Initialize categories with checked status based on existing workout splits
     if (categories) {
-      setWorkoutCategories(categories);
+      setCategories(categories);
     }
 
-    console.log('workoutSplits', workoutSplits);
     console.log('ERROR', workoutSplitsError);
   }
 
@@ -214,13 +217,16 @@ export default function settings() {
   }
 
 console.log('STORE WORKOUT SPLIT', storeWorkoutSplit);
-console.log('workout categories', workoutCategories);
 
+  // callbacks
+  const handlePresentModalPress = useCallback(() => {
+    bottomSheetRef.current?.snapToIndex(2);
+  }, []);
 
+  
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors[colorScheme].background }}>
-        <ScrollView style={[containerStyles.container]}>
-          <View style={{ gap: 12 }}>
+    <SafeAreaView edges={['bottom']} style={{ flex: 1, alignItems: 'flex-start', justifyContent: 'flex-start', alignContent: 'flex-start', backgroundColor: Colors[colorScheme].background }}>
+        <ScrollView style={[containerStyles.container, { gap: 12, paddingTop: 12 }]}>
             <Pressable style={[styles.profileBtn, { backgroundColor: Colors[colorScheme].frameBackground }]}>
               {/* Profile */}
               <View style={{ flexDirection: 'row', gap: 8 }}>
@@ -258,7 +264,8 @@ console.log('workout categories', workoutCategories);
                 marginVertical: 12,
               }}
               renderItem={({ item }) => (
-                <Pressable onPress={() => {
+                <Pressable 
+                 onPress={() => {
                   // Initialize storeWorkoutSplit with existing data when opening modal
                   const existingSplits = workoutSplits?.filter(split => split.workout_days?.day === item.id) || [];
                   const initialChecked = existingSplits.map(split => ({
@@ -328,7 +335,7 @@ console.log('workout categories', workoutCategories);
                           style={{ flexGrow: 0 }}
                           scrollEnabled={false}
                           keyExtractor={(workoutCategory) => workoutCategory.id.toString()}
-                          data={workoutCategories}
+                          data={categories}
                           renderItem={({ item: category, index }) => (
 
 
@@ -397,7 +404,7 @@ console.log('workout categories', workoutCategories);
               </Text>
             </View>
 
-            <FlatList
+             <FlatList
               data={['Health Details', 'Change Step Goal', 'Unit Measure']}
               scrollEnabled={false}
               style={{
@@ -407,25 +414,9 @@ console.log('workout categories', workoutCategories);
                 marginVertical: 12,
               }}
               renderItem={({ item }) => {
-                let route = '';
-                switch (item) {
-                  case 'Health Details':
-                    route = '/settings/health-details';
-                    break;
-                  case 'Change Step Goal':
-                    route = '/settings/change-step-goal';
-                    break;
-                  case 'Unit Measure':
-                    route = '/settings/unit-measure';
-                    break;
-                  default:
-                    route = '/settings';
-                }
-
-
                 return (
                   <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%', marginBottom: 12 }}>
-                    <Link style={{ gap: 12, marginBottom: 6 }} href={route as any as Href}>
+                    <Pressable style={{ flexDirection: 'column', gap: 6, width: '100%'}} onPress={() => { setActiveSheet(item as any); handlePresentModalPress(); }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
                         <Text>{item}</Text>
                       </View>
@@ -433,14 +424,27 @@ console.log('workout categories', workoutCategories);
                       {/**Horizontal line */}
                       <View style={{ height: 1, backgroundColor: Colors[colorScheme].text['200'], width: '100%' }} />
 
-                    </Link>
+                    </Pressable>
                   </View>
-
                 )
               }
               }
             />
-          </View>
+
+
+   
+              <BottomSheet ref={bottomSheetRef} snapPoints={snapPoints} index={-1} enableDynamicSizing={false} enablePanDownToClose>
+                   <BottomSheetView style={{ flex: 1 }}>
+                     {activeSheet === 'Change Step Goal' ? (
+                       <ChangeStepGoal />
+                     ) : activeSheet === 'Health Details' ? (
+                       <HealthDetails />
+                     ) : (
+                       <Text>Change Step Goal</Text>
+                     )}
+                   </BottomSheetView>
+             </BottomSheet>
+         
         </ScrollView>
       </SafeAreaView>
 

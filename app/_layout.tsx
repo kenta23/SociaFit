@@ -1,4 +1,5 @@
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { BottomSheetHost } from '@/library/bottomsheetprovider';
 import { supabase } from '@/utils/supabase';
 import { Inter_200ExtraLight, Inter_400Regular, Inter_500Medium, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
@@ -6,6 +7,7 @@ import { useFonts } from 'expo-font';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 export default function RootLayout() {
@@ -59,7 +61,8 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-
+     <GestureHandlerRootView>
+      <BottomSheetHost>
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ headerShown: false }} />
@@ -73,7 +76,9 @@ export default function RootLayout() {
           <Stack.Screen name="settings/health-details" options={{ headerShown: true, title: 'Health Details', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
         </Stack>
         <StatusBar style="auto" />
-
+       </BottomSheetHost>
+   </GestureHandlerRootView>
+      
     </ThemeProvider>
   );
 }
