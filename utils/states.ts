@@ -28,6 +28,22 @@ interface HealthDetails {
   setHealthDetails: (details: Database['public']['Tables']['health_details']['Row']) => void;
  }
 
+
+//get energy units, distance units, height units
+//create a function to update the unit measure
+//create a function to formulate the unit measure base on the selected units 
+
+interface UnitMeasure { 
+   units: { 
+    energyUnits: string;
+    distanceUnits: string;
+    heightUnits: string;
+   }
+   setUnits: (units: { energyUnits: string; distanceUnits: string; heightUnits: string }) => void;
+   getUnits: () => { energyUnits: string; distanceUnits: string; heightUnits: string };
+   unitsConversion: (units: { energyUnits: string; distanceUnits: string; heightUnits: string }) => void;
+}
+
 export const useStoreData = create<Data>((set) => ({
   data: null,
   storeData: (data: Database['public']['Tables']['userdata']['Row']) => set({ data }),
@@ -39,6 +55,20 @@ export const useStoreStepsCount = create<StepsCount>((set) => ({
     currentSteps: 0,
     setTargetSteps: (steps: number) => set({ targetSteps: steps }),
     setCurrentSteps: (steps: number) => set({ currentSteps: steps }),
+}))
+
+
+export const useStoreUnitMeasure = create<UnitMeasure>((set, get) => ({ 
+   units: {
+      energyUnits: 'Calories',
+      distanceUnits: 'Kilometer',
+      heightUnits: 'Meters',
+   },
+   setUnits: (units: { energyUnits: string; distanceUnits: string; heightUnits: string }) => set({ units }),
+   getUnits: () => { 
+     return { energyUnits: 'Calories', distanceUnits: 'Kilometer', heightUnits: 'Meters' };
+   },
+   unitsConversion: (units: { energyUnits: string; distanceUnits: string; heightUnits: string }) => set({ units }),
 }))
 
 export const useStoreHealthDetails = create<HealthDetails>((set) => ({ 

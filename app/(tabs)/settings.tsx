@@ -5,7 +5,7 @@ import { useStoreWorkoutSplits } from '@/utils/states';
 import { containerStyles } from '@/utils/styles';
 import { supabase } from '@/utils/supabase';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import Checkbox from 'expo-checkbox';
 import { Image } from 'expo-image';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -13,6 +13,7 @@ import { Alert, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, useCol
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ChangeStepGoal from '../settings/change-step-goal';
 import HealthDetails from '../settings/health-details';
+import UnitMeasure from '../settings/unit-measure';
 
 
 
@@ -430,10 +431,13 @@ console.log('STORE WORKOUT SPLIT', storeWorkoutSplit);
               }
               }
             />
-
-
    
               <BottomSheet ref={bottomSheetRef} snapPoints={snapPoints} index={-1} enableDynamicSizing={false} enablePanDownToClose>
+                {activeSheet === 'Unit Measure' ? (
+                  <BottomSheetScrollView  scrollEnabled={true} showsVerticalScrollIndicator={false}>
+                       <UnitMeasure />
+                  </BottomSheetScrollView>
+                ) : (
                    <BottomSheetView style={{ flex: 1 }}>
                      {activeSheet === 'Change Step Goal' ? (
                        <ChangeStepGoal />
@@ -443,6 +447,7 @@ console.log('STORE WORKOUT SPLIT', storeWorkoutSplit);
                        <Text>Change Step Goal</Text>
                      )}
                    </BottomSheetView>
+                )}
              </BottomSheet>
          
         </ScrollView>

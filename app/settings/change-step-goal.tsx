@@ -1,10 +1,12 @@
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
-import { useStoreHealthDetails } from '@/utils/states';
+import { Database } from '@/database.types';
+import { useStoreData, useStoreHealthDetails } from '@/utils/states';
 import { containerStyles } from '@/utils/styles';
+import { supabase } from '@/utils/supabase';
 import { AntDesign } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Alert, Pressable, StyleSheet, Text, TextInput, useColorScheme, View } from 'react-native';
 import {
   getSdkStatus,
   initialize,
@@ -26,10 +28,14 @@ interface HealthDetails {
 
 export default function ChangeStepGoal() {  
     const colorScheme = useColorScheme() ?? 'light';
-    const [stepGoal, setStepGoal] = useState<number>(0);
     const { healthDetails } = useStoreHealthDetails()
     const [derivedWalkingPace, setDerivedWalkingPace] = useState<HealthDetails['walkingPace']>('average');
     const [averageSpeedMs, setAverageSpeedMs] = useState<number | null>(null);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const isLongPressingRef = useRef<boolean>(false);
+    const { data, storeData } = useStoreData();
+    const [stepGoal, setStepGoal] = useState<number>(data?.steps_goal || 0);
 
       // Derive walking pace from Health Connect distance data
       useEffect(() => {
@@ -119,12 +125,110 @@ export default function ChangeStepGoal() {
         return baseCalories * ageAdjustment;
       }
 
+
+      console.log('DATA', data);
+
       const estimatedCalories = useMemo(() => {
-        return calculateCaloriesBurned(stepGoal || 0);
-      }, [stepGoal, averageSpeedMs, healthDetails]);
+        return calculateCaloriesBurned(stepGoal || data?.steps_goal || 0);
+      }, [stepGoal, averageSpeedMs, healthDetails, derivedWalkingPace]);
+
+      // Cleanup interval and timeout on unmount
+      useEffect(() => {
+        return () => {
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
+        };
+      }, []);
+
+      const startLongPress = () => {
+        isLongPressingRef.current = true;
+
+        // Clear any existing timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+
+        // Wait 1 second before starting the interval 
+        timeoutRef.current = setTimeout(() => { 
+          if (isLongPressingRef.current) {
+            intervalRef.current = setInterval(() => {
+              if (isLongPressingRef.current && stepGoal < 55000) {
+                setStepGoal(prev => prev + 1);
+              } else {
+                stopLongPress();
+              }
+            }, 100);
+          }
+        }, 850);
+      };
+
+      const startLongPressMinus = () => { 
+        isLongPressingRef.current = true;
+
+        // Clear any existing timeout
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+
+        // Wait 1 second before starting the interval 
+        timeoutRef.current = setTimeout(() => { 
+          if (isLongPressingRef.current) {
+            intervalRef.current = setInterval(() => {
+              if (isLongPressingRef.current && stepGoal > 0) {
+                setStepGoal(prev => prev - 1);
+              } else {
+                stopLongPress();
+              }
+            }, 100);
+          }
+        }, 850);
+      }
+      const stopLongPress = () => {
+        isLongPressingRef.current = false;
+        
+        // Clear timeout if it hasn't fired yet
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+          timeoutRef.current = null;
+        }
+        
+        // Clear interval if it's running
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
+      };
+
+
+      const saveNewStepsGoal = async () => { 
+         const user = await supabase.auth.getUser();
+
+         const { data, error } = await supabase.from('userdata').update({ 
+            steps_goal: stepGoal,
+         }).eq('user_id', user.data.user?.id as string).select('*').single();
+
+         if (data) { 
+          Alert.alert('Success!', 'Steps goal updated');
+          storeData(data as Database['public']['Tables']['userdata']['Row']);
+         }
+
+         if (error) { 
+          Alert.alert('Error!', error.message);
+         }
+      }
 
       return ( 
-        <SafeAreaView style={{ flex: 1, backgroundColor: Colors[colorScheme].background }} edges={["top"]}>
+        <>
+        <View style={{ flex: 1, alignItems: 'flex-end' }}>
+           <Pressable hitSlop={12} onPress={saveNewStepsGoal} style={{ padding: 12 }}>
+              <Text style={{ color: Colors[colorScheme].green['600'], fontSize: 16, fontWeight: '500' }}>Done</Text>
+           </Pressable>
+        </View>
+        <SafeAreaView style={{ flex: 1, backgroundColor: Colors[colorScheme].background }} edges={["top"]}> 
             <View style={[containerStyles.contentContainer]}>
                 <View style={{ gap: 12, alignItems: 'center', width: '80%' }}>
                     <Text style={[typography.heading, { color: Colors[colorScheme].text[0] }]}>Change Step Goal</Text>
@@ -134,7 +238,10 @@ export default function ChangeStepGoal() {
 
                 <View style={{ gap: 12, alignItems: 'center', width: '80%', marginTop: 24 }}>
                        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', justifyContent: 'space-between' }}>
-                          <Pressable onPress={() => setStepGoal(stepGoal <= 0 ? 0 : stepGoal - 1)} disabled={stepGoal <= 0}>
+                          <Pressable
+                           onPressIn={startLongPressMinus}
+                           onPressOut={stopLongPress}
+                           onPress={() => setStepGoal(stepGoal <= 0 ? 0 : stepGoal - 1)} disabled={stepGoal <= 0}>
                             <AntDesign name="minus" size={32} color={Colors[colorScheme].pink['400']} />
                           </Pressable>
                            <TextInput
@@ -143,7 +250,7 @@ export default function ChangeStepGoal() {
                                const formattedText = text.replace(/[^0-9]/g, '');
                                setStepGoal(Number(formattedText) || 0);
                              }}
-                             value={(stepGoal || 0).toString()}
+                             value={(stepGoal || data?.steps_goal)?.toString()}
                               style={{
                                  backgroundColor: Colors[colorScheme].text['50'],
                                  borderColor: 'transparent',
@@ -154,7 +261,11 @@ export default function ChangeStepGoal() {
                               }}
                             >         
                             </TextInput>
-                          <Pressable onLongPress={() => setStepGoal(stepGoal + 1)} onPress={() => setStepGoal(stepGoal + 1)} disabled={stepGoal >= 100000}>
+                          <Pressable 
+                           onPressIn={startLongPress}
+                           onPressOut={stopLongPress}
+                           onPress={() => setStepGoal(stepGoal + 1)} 
+                           disabled={stepGoal >= 100000}>
                              <AntDesign name="plus" size={32} color={Colors[colorScheme].green['400']} />
                           </Pressable>
                        </View>
@@ -166,10 +277,12 @@ export default function ChangeStepGoal() {
                          <Text style={{ textAlign: 'center', marginTop: 4, opacity: 0.7 }}>
                            Pace: {derivedWalkingPace} {averageSpeedMs ? `(${averageSpeedMs.toFixed(2)} m/s)` : ''}
                          </Text>
+                     
                        </View>
                 </View>
             </View>
         </SafeAreaView>
+        </>
       )
 }
 
