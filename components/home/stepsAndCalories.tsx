@@ -1,12 +1,15 @@
 import { typography } from '@/constants/typography';
 import { Database } from '@/database.types';
+import { useStoreUnitMeasure } from '@/utils/states';
 import { supabase } from '@/utils/supabase';
+import { convertCaloriesToEnergyUnit, formatEnergyValue } from '@/utils/unitsconversion';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { readRecord } from 'react-native-health-connect';
 
 export default function StepsAndCalories( { data }: { data: Database['public']['Tables']['userdata']['Row'] | null }) {
    const [weight, setWeight] = useState<number>(0);
+   const { units } = useStoreUnitMeasure();
+  
   /*60 kg → ~0.04 kcal/step
 
 80 kg → ~0.05 kcal/step
@@ -16,12 +19,6 @@ export default function StepsAndCalories( { data }: { data: Database['public']['
   const caloriesPerStep: number = weight === 60 ? 0.04 : weight === 80 ? 0.05 : weight === 100 ? 0.06 : 0;
   const caloriesBurnt: number = useMemo(() =>  data?.today_steps ? data.today_steps * (data?.ds_travelled ?? 0) * caloriesPerStep : 0, [data?.today_steps, caloriesPerStep]);
 
-  //get data from health connect Api 
-  const readDataFromHealthConnect = async () => { 
-    readRecord('ActiveCaloriesBurned', '').then((result) => {
-      console.log('Retrieved record: ', JSON.stringify({ result }, null, 2));
-    });
-  }
 
 useEffect(() => {
    async function getData() {
@@ -60,9 +57,9 @@ useEffect(() => {
             <Text style={[typography.description, styles.todayClr]}>
               Calories burnt
             </Text>
-            <Text style={[typography.heading, styles.text]}>{caloriesBurnt}</Text>
+                <Text style={[typography.heading, styles.text]}>{convertCaloriesToEnergyUnit(caloriesBurnt, units.energyUnits)}</Text>
           </View>
-          <Text style={[typography.medium, styles.todayClr]}>kCal</Text>
+          <Text style={[typography.medium, styles.todayClr]}>{formatEnergyValue(caloriesBurnt, units.energyUnits)}</Text>
         </View>
       </View>
       

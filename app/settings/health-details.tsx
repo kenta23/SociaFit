@@ -1,9 +1,10 @@
 import { Colors } from "@/constants/Colors";
 import { typography } from "@/constants/typography";
 import { Database } from "@/database.types";
-import { useStoreHealthDetails } from "@/utils/states";
+import { useStoreHealthDetails, useStoreUnitMeasure } from "@/utils/states";
 import { containerStyles } from "@/utils/styles";
 import { supabase } from "@/utils/supabase";
+import { convertHeightToHeightUnit, formatHeightValue } from "@/utils/unitsconversion";
 import BottomSheet, { BottomSheetBackdrop, BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Image } from "expo-image";
 import React, { useCallback, useRef, useState } from "react";
@@ -24,8 +25,24 @@ export default function HealthDetails () {
   const bottomSheetRef = useRef<BottomSheet>(null);  
   const [storeBottomSheetContent, setStoreBottomSheetContent] = useState<{ id: number, value: number[] | string[] }[]>([{ id: 0, value: [] }]);
   const { healthDetails, setHealthDetails } = useStoreHealthDetails();
+  const { units } = useStoreUnitMeasure();
+
  
 
+
+  const formatHeight = () => { 
+     try {
+      if (!healthDetails?.height) return 'N/A';
+      const height = formatHeightValue(healthDetails.height, units.heightUnits);
+
+      return height;
+     } catch (error) {
+       console.log('ERRORS in formatHeight', error);
+       return 'N/A';
+     }
+  }
+
+  console.log('HEIGHT', healthDetails?.height);
 
   function handleBottomSHeetContent(index: number) {
         bottomSheetRef.current?.snapToIndex(1, { 
@@ -137,7 +154,9 @@ export default function HealthDetails () {
       {item.value.map((i, idx) => {
         let text = i.toString();
         if (item.id === 0) text += ' kg';
-        else if (item.id === 1) text += ' cm';
+        else if (item.id === 1) { 
+          text = convertHeightToHeightUnit(i as number, units.heightUnits) + ' ' + (units.heightUnits === 'Centimeters' ? 'cm' : 'm');
+        }
         else text;
         const lowOpacity = item.id === 0 ? healthDetails?.weight === i ? 0.5 : 1 : item.id === 1 ? healthDetails?.height === i ? 0.5 : 1 : item.id === 2 ? healthDetails?.age === i ? 0.5 : 1 : item.id === 3 ? healthDetails?.gender === i ? 0.5 : 1 : 1
 
@@ -191,7 +210,7 @@ export default function HealthDetails () {
                 padding: 12,
                 borderRadius: 16,
                 marginVertical: 12,
-                width: '90%',
+                width: '100%',
               }}
               renderItem={({ item, index }) => {
                 return (
@@ -201,7 +220,7 @@ export default function HealthDetails () {
                          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
                            <Text>{item}</Text>
 
-                           <Text style={[typography.description, { color: Colors[colorScheme].green['400'] }]}>{index === 0 ? healthDetails?.weight + ' kg' : index === 1 ? healthDetails?.height + ' cm' : index === 2 ? healthDetails?.age + ' years' : healthDetails?.gender}</Text>
+                           <Text style={[typography.description, { color: Colors[colorScheme].green['400'] }]}>{index === 0 ? healthDetails?.weight + ' kg' : index === 1 ? formatHeight() : index === 2 ? healthDetails?.age + ' years' : healthDetails?.gender}</Text>
                         </View>
 
                         {/**Horizontal line */}

@@ -1,15 +1,38 @@
 import { Colors } from "@/constants/Colors";
 import { typography } from "@/constants/typography";
+import { useStoreUnitMeasure } from "@/utils/states";
 import { containerStyles } from "@/utils/styles";
 import Checkbox from "expo-checkbox";
 import React from "react";
-import { FlatList, Pressable, Text, useColorScheme, View } from "react-native";
+import { Alert, FlatList, Pressable, Text, useColorScheme, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 
 
 export default function UnitMeasure () { 
     const colorScheme = useColorScheme() ?? 'light';
+    const { units, setUnits } = useStoreUnitMeasure();
+
+
+    const storeUnitType = ( unit: keyof typeof units, val: string) => { 
+       try {
+        // Create the updated units object
+        const updatedUnits = { ...units, [unit]: val };
+        
+        // Update the store (Zustand will automatically persist this)
+        setUnits(updatedUnits);
+
+        console.log('VAL', val);
+        console.log('Updated units:', updatedUnits);
+  
+        Alert.alert('Unit Measure', 'Unit Measure updated successfully');
+
+       } catch (error) {
+          console.log('error', error);
+          Alert.alert('Error', 'Failed to update unit measure');
+       }
+    }
+
+
      return (
         <>
         <View style={{ flex: 1, alignItems: 'flex-end' }}>
@@ -53,8 +76,12 @@ export default function UnitMeasure () {
                         <Text>{item}</Text>
                         
                         <Checkbox 
-                          style={{ borderColor: 'transparent', borderWidth: 0 }}
-                          value={item === 'Calories'}
+                          hitSlop={12}
+                          color={Colors[colorScheme].green[600]}
+                          value={item === units.energyUnits}
+                          onValueChange={(value: boolean) => { 
+                            storeUnitType('energyUnits', value ? item : units.energyUnits);
+                          }}
                         />
                       </View>
 
@@ -92,8 +119,11 @@ export default function UnitMeasure () {
                         <Text>{item}</Text>
                         
                         <Checkbox 
-                          style={{ borderColor: 'transparent', borderWidth: 0 }}
-                          value={item === 'Calories'}
+                           color={Colors[colorScheme].green[600]}
+                           value={item === units.distanceUnits}
+                           onValueChange={(value: boolean) => { 
+                             storeUnitType('distanceUnits', value ? item : units.distanceUnits);
+                           }}
                         />
                       </View>
 
@@ -107,7 +137,7 @@ export default function UnitMeasure () {
               }
             />
 
-             {/* Distance Units */}
+             {/* Height Units */}
              <View style={{ alignItems: 'flex-start'}}>
               <Text style={[typography.subheading, { textAlign: 'left' }]}>
                 Height Units
@@ -115,7 +145,7 @@ export default function UnitMeasure () {
             </View>
 
              <FlatList
-              data={['Kilometer', 'Miles', 'Meters']}
+              data={['Centimeters', 'Meters', 'Kilometer', 'Miles']}
               scrollEnabled={false}
               style={{
                 backgroundColor: Colors[colorScheme].frameBackground,
@@ -131,8 +161,11 @@ export default function UnitMeasure () {
                         <Text>{item}</Text>
                         
                         <Checkbox 
-                          style={{ borderColor: 'transparent', borderWidth: 0 }}
-                          value={item === 'Calories'}
+                             color={Colors[colorScheme].green[600]}
+                             value={item === units.heightUnits}
+                             onValueChange={(value: boolean) => { 
+                               storeUnitType('heightUnits', value ? item : units.heightUnits);
+                             }}
                         />
                       </View>
 

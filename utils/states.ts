@@ -1,5 +1,6 @@
 import { Database } from '@/database.types';
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 type WorkoutSplitType = (Database['public']['Tables']['workout_splits']['Row'] & { workout_days: Database['public']['Tables']['workout_days']['Row'] } & { workout_categories: Database['public']['Tables']['workout_categories']['Row']})[];
 
@@ -58,18 +59,24 @@ export const useStoreStepsCount = create<StepsCount>((set) => ({
 }))
 
 
-export const useStoreUnitMeasure = create<UnitMeasure>((set, get) => ({ 
-   units: {
-      energyUnits: 'Calories',
-      distanceUnits: 'Kilometer',
-      heightUnits: 'Meters',
-   },
-   setUnits: (units: { energyUnits: string; distanceUnits: string; heightUnits: string }) => set({ units }),
-   getUnits: () => { 
-     return { energyUnits: 'Calories', distanceUnits: 'Kilometer', heightUnits: 'Meters' };
-   },
-   unitsConversion: (units: { energyUnits: string; distanceUnits: string; heightUnits: string }) => set({ units }),
-}))
+export const useStoreUnitMeasure = create<UnitMeasure>()(
+  persist((set, get) => ({ 
+      units: {
+        energyUnits: 'Calories',
+        distanceUnits: 'Kilometer',
+        heightUnits: 'Centimeters',
+      },
+      setUnits: (units: { energyUnits: string; distanceUnits: string; heightUnits: string }) => set({ units }),
+      unitsConversion: (units: { energyUnits: string; distanceUnits: string; heightUnits: string }) => set({ units }),
+      getUnits: () => { 
+        return get().units;
+      },
+    }),
+    {
+      name: 'unit-measure-storage', // unique name for the storage key
+    }
+  )
+)
 
 export const useStoreHealthDetails = create<HealthDetails>((set) => ({ 
   healthDetails: null,

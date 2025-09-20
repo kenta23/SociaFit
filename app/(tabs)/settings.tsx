@@ -8,11 +8,11 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
 import Checkbox from 'expo-checkbox';
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ChangeStepGoal from '../settings/change-step-goal';
-import HealthDetails from '../settings/health-details';
 import UnitMeasure from '../settings/unit-measure';
 
 
@@ -417,15 +417,28 @@ console.log('STORE WORKOUT SPLIT', storeWorkoutSplit);
               renderItem={({ item }) => {
                 return (
                   <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%', marginBottom: 12 }}>
-                    <Pressable style={{ flexDirection: 'column', gap: 6, width: '100%'}} onPress={() => { setActiveSheet(item as any); handlePresentModalPress(); }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
-                        <Text>{item}</Text>
-                      </View>
+                   {item === 'Health Details' ?(
+                      <Pressable style={{ flexDirection: 'column', gap: 6, width: '100%' }} onPress={() => router.push('/settings/health-details')}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                          <Text>{item}</Text>
+                        </View>
 
-                      {/**Horizontal line */}
-                      <View style={{ height: 1, backgroundColor: Colors[colorScheme].text['200'], width: '100%' }} />
+                        {/**Horizontal line */}
+                        <View style={{ height: 1, backgroundColor: Colors[colorScheme].text['200'], width: '100%' }} />
+                      </Pressable>
+                    ) :
+                      <Pressable style={{ flexDirection: 'column', gap: 6, width: '100%' }} onPress={() => { setActiveSheet(item as any); handlePresentModalPress(); }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                          <Text>{item}</Text>
+                        </View>
 
-                    </Pressable>
+                        {/**Horizontal line */}
+                        <View style={{ height: 1, backgroundColor: Colors[colorScheme].text['200'], width: '100%' }} />
+
+                      </Pressable>
+
+                    }                     
+
                   </View>
                 )
               }
@@ -441,8 +454,6 @@ console.log('STORE WORKOUT SPLIT', storeWorkoutSplit);
                    <BottomSheetView style={{ flex: 1 }}>
                      {activeSheet === 'Change Step Goal' ? (
                        <ChangeStepGoal />
-                     ) : activeSheet === 'Health Details' ? (
-                       <HealthDetails />
                      ) : (
                        <Text>Change Step Goal</Text>
                      )}
