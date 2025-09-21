@@ -102,3 +102,25 @@ export const formatHeightValue = (height: number, targetUnit?: string, decimalPl
         return `${convertHeightToHeightUnit(height, heightUnit).toFixed(decimalPlaces)} cm`;
    }
  };
+
+
+ export const distanceConversion = (distance: number, targetUnit?: string): string => {
+  const distanceUnit = targetUnit;
+
+  const conversionFactor = DISTANCE_CONVERSIONS[distanceUnit as DistanceUnit];
+  
+  if (!conversionFactor) {
+    console.warn(`Unknown distance unit: ${distanceUnit}. Using Meters as default.`);
+    return distance + ' m';
+  }
+  const result = distance * conversionFactor;
+  
+  if(distanceUnit === 'Kilometer') {
+    return parseFloat(result.toFixed(1)) + ' km';
+  }
+  if(distanceUnit === 'Miles') {
+    return parseFloat(result.toFixed(1)) + ' miles';
+  }
+
+  return parseFloat(result.toFixed(1)) + ' m';
+ }

@@ -1,7 +1,8 @@
-import * as Location from 'expo-location';
-import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { WebView } from 'react-native-webview';
+import { useStoreDistance } from '@/utils/states';
+import React, { useEffect } from 'react';
+import { Alert, StyleSheet, Text, View } from 'react-native';
+import { getSdkStatus, initialize } from 'react-native-health-connect';
+import GoogleMapShow from './map';
 
 const html = `
 <!DOCTYPE html>
@@ -65,72 +66,43 @@ const html = `
 `;
 
 export default function DistanceMap() {
-  const webviewRef = useRef<WebView | null>(null);
-  const [distance, setDistance] = useState(0);
-  const [location, setLocation] = useState<{
-    latitude: number;
-    longitude: number;
-} | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  const locationCallback = (loc: Location.LocationObject) => {
-    const newCoord = {
-      latitude: loc.coords.latitude,
-      longitude: loc.coords.longitude,
-    };
-    setLocation(newCoord);
-  }
-
-
-  async function getCurrentLocation() {
-    let { status } = await Location.requestForegroundPermissionsAsync();
-    if (status !== 'granted') {
-      setErrorMsg('Permission to access location was denied');
-      return;
-    }
-
-    const subscription = await Location.watchPositionAsync({ 
-      accuracy: Location.Accuracy.High,
-      distanceInterval: 5, //5 meters
-      timeInterval: 1000,
-    }, locationCallback);
-
-     if (location) { 
-       webviewRef.current?.postMessage(JSON.stringify({ latitude: location.latitude, longitude: location.longitude }));
-     }
-
-     return () => subscription.remove();
-  }
+  
+  const { setDistance, distance } = useStoreDistance();
 
 
   useEffect(() => {
-    getCurrentLocation();
+      async function getTotalDistance () { 
+        const isInitialized = await initialize();
+
+      if(!isInitialized) {
+        Alert.alert('Failed to initialize Health Connect');
+        return;
+      }
+
+       const sdkStatus = await getSdkStatus();
+
+        console.log('HEALTH CONNECT STATUS: ' + sdkStatus);
+        Alert.alert('HEALTH CONNECT STATUS: ' + sdkStatus);
+        return;
+ 
+
+       
+      }
+
+      getTotalDistance();
   }, []);
 
 
   return (
     <View style={styles.container}>
       <View style={styles.mapWrapper}>
-        <WebView
-          ref={webviewRef}
-          originWhitelist={["*"]}
-          source={{ html }}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          onMessage={(event) => {
-            const data = JSON.parse(event.nativeEvent.data);
-            if (data.distance !== undefined) {
-              setDistance(data.distance);
-            }
-          }}
-          style={styles.webview}
-        />
+         <GoogleMapShow />
       </View>
 
       <View style={styles.distanceContainer}>
            <View style={styles.distanceWrapper}>
               <Text style={styles.distance}>{`Distance: `}</Text>
-             <Text style={styles.km}>{distance} km</Text>
+             <Text style={styles.km}>0 km</Text>
            </View>
       </View>
     </View>

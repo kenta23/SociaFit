@@ -12,6 +12,10 @@ interface Data {
 interface StepsCount { 
     targetSteps: number;
     currentSteps: number;
+    weeklySteps: number;
+    monthlySteps: number;
+    setWeeklySteps: (steps: number) => void;
+    setMonthlySteps: (steps: number) => void;
     setTargetSteps: (steps: number) => void;
     setCurrentSteps: (steps: number) => void;
 }
@@ -45,6 +49,13 @@ interface UnitMeasure {
    unitsConversion: (units: { energyUnits: string; distanceUnits: string; heightUnits: string }) => void;
 }
 
+
+interface Distance { 
+  distance: number;
+  setDistance: (distance: number) => void;
+}
+
+
 export const useStoreData = create<Data>((set) => ({
   data: null,
   storeData: (data: Database['public']['Tables']['userdata']['Row']) => set({ data }),
@@ -52,10 +63,14 @@ export const useStoreData = create<Data>((set) => ({
 
 
 export const useStoreStepsCount = create<StepsCount>((set) => ({ 
-    targetSteps: 0,
+    targetSteps: 0, //today steps
     currentSteps: 0,
+    weeklySteps: 0,
+    monthlySteps: 0,
     setTargetSteps: (steps: number) => set({ targetSteps: steps }),
     setCurrentSteps: (steps: number) => set({ currentSteps: steps }),
+    setWeeklySteps: (steps: number) => set({ weeklySteps: steps }),
+    setMonthlySteps: (steps: number) => set({ monthlySteps: steps }),
 }))
 
 
@@ -89,6 +104,12 @@ export const useStoreWorkoutSplits = create<WorkoutSplits>((set) => ({
    setCategories: (categories: Database['public']['Tables']['workout_categories']['Row'][]) => set({ categories }),
    setWorkoutSplits: (splits: WorkoutSplitType) => set({ workoutSplits: splits }),
 }))
+
+
+export const useStoreDistance = create<Distance>((set) => ({ 
+   distance: 0,
+   setDistance: (distance: number) => set({ distance }),
+}));
 
 
 

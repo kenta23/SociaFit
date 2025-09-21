@@ -1,14 +1,14 @@
 import { typography } from '@/constants/typography';
-import { Database } from '@/database.types';
-import { useStoreUnitMeasure } from '@/utils/states';
+import { useStoreData, useStoreUnitMeasure } from '@/utils/states';
 import { supabase } from '@/utils/supabase';
 import { convertCaloriesToEnergyUnit, formatEnergyValue } from '@/utils/unitsconversion';
 import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-export default function StepsAndCalories( { data }: { data: Database['public']['Tables']['userdata']['Row'] | null }) {
+export default function StepsAndCalories () {
    const [weight, setWeight] = useState<number>(0);
    const { units } = useStoreUnitMeasure();
+   const {  data } = useStoreData();
   
   /*60 kg → ~0.04 kcal/step
 

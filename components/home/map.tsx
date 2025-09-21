@@ -40,11 +40,12 @@ const DEFAULT_REGION: Region = {
   longitudeDelta: 0.0421,
 };
 
-export default function History() {
+export default function GoogleMapShow() {
    const [location, setLocation] = useState<Location.LocationObject | null>(null);
    const [isLoading, setIsLoading] = useState(true);
    const [error, setError] = useState<string | null>(null);
    const [pathCoordinates, setPathCoordinates] = useState<Array<{latitude: number, longitude: number}>>([]);
+   const [totalDistance, setTotalDistance] = useState(0);
 
    useEffect(() => { 
       async function getLocation() { 
@@ -133,8 +134,12 @@ export default function History() {
 
   return (
    <SafeAreaView style={styles.container}>
-   
      <MapView
+       scrollEnabled={false}
+       pitchEnabled={false}
+       zoomControlEnabled   
+       rotateEnabled={false}
+       zoomEnabled={false}
        provider={PROVIDER_GOOGLE}
        showsUserLocation={true}
        showsMyLocationButton={true}
@@ -160,7 +165,8 @@ export default function History() {
          <Text style={styles.loadingText}>Getting your location...</Text>
        </View>
      )}
-     
+
+   
      {error && (
        <View style={styles.loadingContainer}>
          <Text style={styles.loadingText}>{error}</Text>

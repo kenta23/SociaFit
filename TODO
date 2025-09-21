@@ -11,7 +11,7 @@ npx expo run:android
 ToDos for Tomorrow
 1. Workout Schedule *
 2. History 
-3. Finish Settings (Step Goals, Unit Measure) 
+3. Finish Settings (Step Goals, Unit Measure) *
 4. Update distance based on Health Connect API 
 5. fix state management (zustand) on index and settings * 
 6. fix functions and triggers on supabase *
@@ -22,6 +22,6 @@ ToDos for Tomorrow
 
 September 21, 2025 
 1. Continue work on Distance conversion 
-2. Git merging from this branch (Sdk54) to main
+2. Git merging from this branch (Sdk54) to master
 3. History 
 

@@ -48,10 +48,12 @@
             "useFrameworks": "static"
           },
           "android": {
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35,
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
             "minSdkVersion": 26,
             "permissions": [
+              "android.permission.health.READ_HEART_RATE",
+              "android.permission.health.WRITE_HEART_RATE",
               "android.permission.health.READ_STEPS",
               "android.permission.health.WRITE_STEPS",
               "android.permission.health.READ_ACTIVE_CALORIES_BURNED",
@@ -63,7 +65,14 @@
         }
       ],
       "expo-web-browser",
-      "expo-health-connect"
+      "expo-health-connect",
+      
+      [
+        "react-native-maps",
+        {
+          "androidGoogleMapsApiKey": "AIzaSyAzQdTSsRkdcuUHRA-eUChgWRAdEGZRSWw"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
