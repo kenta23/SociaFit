@@ -1,7 +1,7 @@
-import { useStoreDistance } from '@/utils/states';
-import React, { useEffect } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
-import { getSdkStatus, initialize } from 'react-native-health-connect';
+import { useStoreDistance, useStoreUnitMeasure } from '@/utils/states';
+import { distanceConversion } from '@/utils/unitsconversion';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import GoogleMapShow from './map';
 
 const html = `
@@ -67,31 +67,9 @@ const html = `
 
 export default function DistanceMap() {
   
-  const { setDistance, distance } = useStoreDistance();
-
-
-  useEffect(() => {
-      async function getTotalDistance () { 
-        const isInitialized = await initialize();
-
-      if(!isInitialized) {
-        Alert.alert('Failed to initialize Health Connect');
-        return;
-      }
-
-       const sdkStatus = await getSdkStatus();
-
-        console.log('HEALTH CONNECT STATUS: ' + sdkStatus);
-        Alert.alert('HEALTH CONNECT STATUS: ' + sdkStatus);
-        return;
- 
-
-       
-      }
-
-      getTotalDistance();
-  }, []);
-
+ const { distance } = useStoreDistance();
+ const { units } = useStoreUnitMeasure();
+ const convertedDistance = distanceConversion(distance, units.distanceUnits);
 
   return (
     <View style={styles.container}>
@@ -102,7 +80,7 @@ export default function DistanceMap() {
       <View style={styles.distanceContainer}>
            <View style={styles.distanceWrapper}>
               <Text style={styles.distance}>{`Distance: `}</Text>
-             <Text style={styles.km}>0 km</Text>
+             <Text style={styles.km}>{convertedDistance}</Text>
            </View>
       </View>
     </View>

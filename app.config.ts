@@ -14,6 +14,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   android: {
     package: "com.sociafit.app",
+    newArchEnabled: true,
     adaptiveIcon: {
       foregroundImage: "./assets/images/logo_icon.png"
     },
@@ -77,6 +78,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   experiments: {
     typedRoutes: true
   },
+  
   extra: {
     router: {},
     eas: {

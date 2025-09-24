@@ -113,8 +113,11 @@ export default function TabLayout() {
       {/**History */}
       <Tabs.Screen
         name="history"
-        options={{
+        options={{         
           title: 'History',
+          headerShown: true,  
+          headerBackButtonDisplayMode: 'default',
+          headerLeft: () => <Pressable style={{ marginLeft: 8 }} onPress={() => router.back()}><Image source={require('@/assets/back button.svg')} style={{ width: 26, height: 26 }} /></Pressable>,
           tabBarIcon: ({ color }) => <FontAwesome5 name="history" size={22} color={color} />,
         }}
       />

@@ -52,6 +52,8 @@ interface UnitMeasure {
 
 interface Distance { 
   distance: number;
+  coordinates: { latitude: number; longitude: number }[];
+  setCoordinates: (coordinates: { latitude: number; longitude: number }[]) => void;
   setDistance: (distance: number) => void;
 }
 
@@ -108,7 +110,9 @@ export const useStoreWorkoutSplits = create<WorkoutSplits>((set) => ({
 
 export const useStoreDistance = create<Distance>((set) => ({ 
    distance: 0,
+   coordinates: [],
    setDistance: (distance: number) => set({ distance }),
+   setCoordinates: (coordinates: { latitude: number; longitude: number }[]) => set({ coordinates }),
 }));
 
 

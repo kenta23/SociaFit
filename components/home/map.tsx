@@ -1,4 +1,6 @@
+import { useStoreDistance } from '@/utils/states';
 import * as Location from 'expo-location';
+import { getDistance } from 'geolib';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region } from 'react-native-maps';
@@ -45,7 +47,7 @@ export default function GoogleMapShow() {
    const [isLoading, setIsLoading] = useState(true);
    const [error, setError] = useState<string | null>(null);
    const [pathCoordinates, setPathCoordinates] = useState<Array<{latitude: number, longitude: number}>>([]);
-   const [totalDistance, setTotalDistance] = useState(0);
+   const { setDistance, distance, setCoordinates } = useStoreDistance();
 
    useEffect(() => { 
       async function getLocation() { 
@@ -62,17 +64,33 @@ export default function GoogleMapShow() {
             
             const currentLocation = await Location.getCurrentPositionAsync({
                accuracy: Location.Accuracy.High,
-               timeInterval: 1000,
+               timeInterval: 2000,
                distanceInterval: 5,
             });
 
-           
+        
             setLocation(currentLocation);
             // Initialize path with starting location
             setPathCoordinates([{
                latitude: currentLocation.coords.latitude,
                longitude: currentLocation.coords.longitude
             }]);
+
+            //store coordinates to global state
+            setCoordinates([
+               { latitude: currentLocation.coords.latitude, longitude: currentLocation.coords.longitude }
+            ])
+
+
+              //calculate total distance travelled 
+              if (pathCoordinates.length > 0) {
+                const lastCoord = pathCoordinates[pathCoordinates.length - 1];
+                const dist = getDistance(lastCoord, currentLocation.coords);
+                setDistance(distance + dist);
+              } else {
+                setDistance(0);
+              }
+
          } catch (err) {
             console.error('Error getting location:', err);
             setError('Failed to get location');
@@ -84,45 +102,8 @@ export default function GoogleMapShow() {
       getLocation();
    }, []);
 
-   // Simulate movement every 2 seconds
-//    useEffect(() => {
-//       if (!location) return;
 
-//       const interval = setInterval(() => {
-//          setLocation(prevLocation => {
-//             if (!prevLocation) return prevLocation;
-
-//             // Simulate walking/running movement
-//             // Small random changes in coordinates (roughly 10-50 meters)
-//             const latChange = (Math.random() - 0.5) * 0.0005; // ~50m max change
-//             const lngChange = (Math.random() - 0.5) * 0.0005; // ~50m max change
-            
-//             const newLocation = {
-//                ...prevLocation,
-//                coords: {
-//                   ...prevLocation.coords,
-//                   latitude: prevLocation.coords.latitude + latChange,
-//                   longitude: prevLocation.coords.longitude + lngChange,
-//                }
-//             };
-
-//             // Add new coordinate to path
-//             setPathCoordinates(prevPath => [
-//                ...prevPath,
-//                {
-//                   latitude: newLocation.coords.latitude,
-//                   longitude: newLocation.coords.longitude
-//                }
-//             ]);
-
-//             return newLocation;
-//          });
-//       }, 2000); // Update every 2 seconds
-
-//       return () => clearInterval(interval);
-//    }, [location]);
-
-   console.log('My location', location);
+ 
 
    // Create region from location or use default
    const mapRegion: Region = location ? {
@@ -137,9 +118,10 @@ export default function GoogleMapShow() {
      <MapView
        scrollEnabled={false}
        pitchEnabled={false}
-       zoomControlEnabled   
+       zoomControlEnabled={false}   
        rotateEnabled={false}
        zoomEnabled={false}
+       scrollDuringRotateOrZoomEnabled={false}
        provider={PROVIDER_GOOGLE}
        showsUserLocation={true}
        showsMyLocationButton={true}

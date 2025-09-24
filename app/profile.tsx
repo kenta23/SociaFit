@@ -1,3 +1,4 @@
+import DisplayMapContent from '@/components/feeds/display_map_content';
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -64,7 +65,7 @@ export default function Profile() {
 
             <View style={{ gap: 10, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>            
               {/**Activity 1 */}
-                 <View style={[styles.activity, { backgroundColor: Colors[colorScheme].frameBackground,shadowColor: '#DBDADA', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }]}>
+                 <View style={[styles.activity, { backgroundColor: Colors[colorScheme].frameBackground, shadowColor: '#DBDADA', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }]}>
                    <View style={{ paddingHorizontal: 10, alignSelf: 'flex-start' }}>     
                      
                        <View style={styles.activityHeader}>   
@@ -74,7 +75,7 @@ export default function Profile() {
                            <View>
                                <Text style={typography.medium}>Rusty Miguel O. Ramos</Text>
                                <Text style={typography.small}>gkjgkjskjkjgs</Text>
-                           </View>
+                           </View> 
                         </View>
 
 
@@ -93,10 +94,15 @@ export default function Profile() {
                          {/**ACTIVITY MEDIA */}
 
                              <View style={styles.activityContentImageContainer}>
-                                <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                                <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                                <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                                <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
+                                  <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'nowrap' }}>
+                                     <DisplayMapContent />                               
+                                     <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
+                                  </View>
+
+                                  <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'nowrap' }}>
+                                     <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
+                                     <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
+                                  </View>
                              </View>
 
                    </View>
@@ -116,13 +122,13 @@ export default function Profile() {
 
 const styles = StyleSheet.create({
     activityContentImageContainer: { 
-        width: '100%',
         height: 'auto',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
+        flexDirection: 'column',
         gap: 10,
         borderRadius: 12,
         marginTop: 10,
+        flex: 1,
+        width: '100%',
     },
     activityContentImage: { 
         width: '100%',
@@ -176,6 +182,7 @@ const styles = StyleSheet.create({
         paddingBottom: 10,
         marginTop: 10,
         borderWidth: 1,
+        borderColor: '#7B7B7B',
     },
 
     container: { 
