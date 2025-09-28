@@ -1,4 +1,4 @@
-import DisplayMapContent from '@/components/feeds/display_map_content';
+import ActivityContent from '@/components/feeds/activities';
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -62,55 +62,8 @@ export default function Profile() {
             {/**YOUR ACTIVITIES */}
             <View style={styles.activitiesContainer}>
                 <Text style={typography.subheading}>Your Activities</Text>
-
-            <View style={{ gap: 10, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>            
-              {/**Activity 1 */}
-                 <View style={[styles.activity, { backgroundColor: Colors[colorScheme].frameBackground, shadowColor: '#DBDADA', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }]}>
-                   <View style={{ paddingHorizontal: 10, alignSelf: 'flex-start' }}>     
-                     
-                       <View style={styles.activityHeader}>   
-                        <View style={styles.user}>
-                            <Image style={styles.userImage} contentFit="cover" source={require('@/assets/images/no-user.png')} />
-                           
-                           <View>
-                               <Text style={typography.medium}>Rusty Miguel O. Ramos</Text>
-                               <Text style={typography.small}>gkjgkjskjkjgs</Text>
-                           </View> 
-                        </View>
-
-
-                        <View style={styles.activityOption}>
-                            <Ionicons name='ellipsis-vertical' size={24} color='#3591DD' />
-                        </View>
-                     </View>
-                   </View>
-
-
-
-                   <View style={styles.activityContent}>
-                        <Text style={typography.description}>Content....</Text>
-
-
-                         {/**ACTIVITY MEDIA */}
-
-                             <View style={styles.activityContentImageContainer}>
-                                  <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'nowrap' }}>
-                                     <DisplayMapContent />                               
-                                     <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                                  </View>
-
-                                  <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'nowrap' }}>
-                                     <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                                     <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                                  </View>
-                             </View>
-
-                   </View>
-                </View>
-
-
+                <ActivityContent />
             </View>
-        </View>
             
             {/* Add bottom padding for better scrolling experience */}
             <View style={{ height: 50 }} />
@@ -121,70 +74,6 @@ export default function Profile() {
 
 
 const styles = StyleSheet.create({
-    activityContentImageContainer: { 
-        height: 'auto',
-        flexDirection: 'column',
-        gap: 10,
-        borderRadius: 12,
-        marginTop: 10,
-        flex: 1,
-        width: '100%',
-    },
-    activityContentImage: { 
-        width: '100%',
-        maxWidth: 155,
-        minWidth: 110,
-        height: 150,
-        borderRadius: 8,
-       
-    },
-    activityContent: { 
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        height: 'auto',
-    },
-    activityOption: { 
-        padding: 8,
-    },
-    userImage: { 
-        width: 30,
-        height: 30,
-        borderRadius: 100,
-    },
-    user: { 
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-    },
-    userName: { 
-        fontSize: 12,
-        fontFamily: "Inter_500Medium",
-        fontWeight: "500",
-    },
-    date: { 
-        fontSize: 9,
-        fontWeight: "400",
-        fontFamily: "Inter_400Regular",
-    },
-    activityHeader: { 
-        paddingVertical: 12,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        height: 'auto',
-        width: '100%',  
-    }, 
-    activity: { 
-        borderRadius: 24,
-        height: 'auto',
-        width: '96%',
-        marginHorizontal: 'auto',
-        paddingBottom: 10,
-        marginTop: 10,
-        borderWidth: 1,
-        borderColor: '#7B7B7B',
-    },
-
     container: { 
         flex: 1,
         width: '100%',

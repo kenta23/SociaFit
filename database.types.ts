@@ -18,23 +18,26 @@ export type Database = {
         Row: {
           content: string | null
           created_at: string
+          distance_travelled: Json | null
           id: number
-          show_map: boolean | null
-          show_steps: boolean | null
+          steps_total: number | null
+          user_id: string | null
         }
         Insert: {
           content?: string | null
           created_at?: string
+          distance_travelled?: Json | null
           id?: number
-          show_map?: boolean | null
-          show_steps?: boolean | null
+          steps_total?: number | null
+          user_id?: string | null
         }
         Update: {
           content?: string | null
           created_at?: string
+          distance_travelled?: Json | null
           id?: number
-          show_map?: boolean | null
-          show_steps?: boolean | null
+          steps_total?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }

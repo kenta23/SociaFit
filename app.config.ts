@@ -73,7 +73,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       {
         androidGoogleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY
       }
-    ]
+    ],
+    [
+      "expo-image-picker",
+      { photosPermission: "Allow $(PRODUCT_NAME) to access your photos." }
+    ],
   ],
   experiments: {
     typedRoutes: true

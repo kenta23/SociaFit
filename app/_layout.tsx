@@ -74,6 +74,7 @@ export default function RootLayout() {
           <Stack.Screen name="tips/[id]" options={{ headerShown: true, title: 'Tips', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
           <Stack.Screen name="profile" options={{ headerShown: true, title: 'Profile', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
           <Stack.Screen name="settings/health-details" options={{ headerShown: true, title: 'Health Details', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
+          <Stack.Screen name="share-activity" options={{ headerShown: true, title: 'Share Activity', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
         </Stack>
         <StatusBar style="auto" />
        </BottomSheetHost>

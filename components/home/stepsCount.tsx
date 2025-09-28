@@ -19,11 +19,6 @@ interface StepData {
   color: string;
 }
 
-interface StepsCountProps {
-  totalSteps?: number;
-  currentSteps?: number;
-  targetSteps?: number;
-}
 
 export default function StepsCount() {
     const colorScheme = useColorScheme() ?? 'light';

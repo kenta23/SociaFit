@@ -105,6 +105,9 @@ export default function TabLayout() {
        <Tabs.Screen 
         name="feeds"
         options={{
+          headerShown: true,
+          headerBackButtonDisplayMode: 'default',
+          headerLeft: () => <Pressable style={{ marginLeft: 8 }} onPress={() => router.back()}><Image source={require('@/assets/back button.svg')} style={{ width: 26, height: 26 }} /></Pressable>,
           title: 'Feeds',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="newspaper-variant-outline" size={22} color={color} />,
         }}
