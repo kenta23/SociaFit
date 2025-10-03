@@ -20,6 +20,7 @@ export type Database = {
           created_at: string
           distance_travelled: Json | null
           id: number
+          post_id: string | null
           steps_total: number | null
           user_id: string | null
         }
@@ -28,6 +29,7 @@ export type Database = {
           created_at?: string
           distance_travelled?: Json | null
           id?: number
+          post_id?: string | null
           steps_total?: number | null
           user_id?: string | null
         }
@@ -36,6 +38,7 @@ export type Database = {
           created_at?: string
           distance_travelled?: Json | null
           id?: number
+          post_id?: string | null
           steps_total?: number | null
           user_id?: string | null
         }

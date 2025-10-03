@@ -39,3 +39,12 @@ September 28, 2025
 3. activity posting works fine 
 
 
+@today
+
+✔ Supabase storage bucket -> RLS Policies @done(25-10-03 20:56)
+✔ Fix Image upload issue @done(25-10-03 20:56)
+
+
+☐ Finish work on feed page 
+☐ Following function 
+☐ display activities only for the user you follow

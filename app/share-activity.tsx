@@ -57,22 +57,12 @@ export default function ShareActivity() {
 
           const userId = user.data.user.id;
 
-          // Upload images to storage using the utility function
-          // Use 'media' as the bucket name and userId as the folder for RLS policy
-          const uploadResults = await uploadMultipleImages(selectedImage, 'media', userId);
-          
-          // Filter successful uploads and get their public URLs
-          const uploadedImages = uploadResults
-            .filter(result => result.success && result.publicUrl)
-            .map(result => result.publicUrl!);
-
-          console.log('Uploaded images:', uploadedImages);
-
+ 
           const { data, error } = await supabase.from('activities').insert({ 
                 content: textContent,
                 user_id: userId,
-                steps_total: currentSteps,
-                distance_travelled: coordinates,
+                steps_total: displayStepsCount ? currentSteps : null,
+                distance_travelled: displayDistanceMap ? coordinates : null,
           }).select('*').single();
 
           if (error) {
@@ -82,7 +72,24 @@ export default function ShareActivity() {
 
           console.log('Activity created:', data);
 
-          if(data) { 
+          if (data.id) {
+            if(selectedImage.length > 0) { 
+                        // Upload images to storage using the utility function
+            // Use 'media' as the bucket name and userId as the folder for RLS policy
+            const uploadResults = await uploadMultipleImages(
+               selectedImage,
+               "media",
+               data.post_id as string
+             );
+ 
+             // Filter successful uploads and get their public URLs
+             const uploadedImages = uploadResults
+               .filter((result) => result.success && result.publicUrl)
+               .map((result) => result.publicUrl!);
+ 
+             console.log("Uploaded images:", uploadedImages);
+               }
+
                 Snackbar.show({ 
                      text: 'Activity shared successfully',
                      duration: Snackbar.LENGTH_SHORT,

@@ -1,4 +1,7 @@
+import { decode } from 'base64-arraybuffer';
+import * as FileSystem from 'expo-file-system/legacy';
 import { supabase } from './supabase';
+
 
 
 export interface ImageUploadResult {
@@ -26,13 +29,20 @@ export const uploadImageToSupabase = async (
 ): Promise<ImageUploadResult> => {
   try {
     // Read the file from the URI
-    const response = await fetch(imageUri);
+    // const response = await fetch(imageUri, {
+    //   headers: {
+    //     'Content-Type': 'image/jpeg'
+    //   }
+    // });
+    // if (!response.ok) {
+    //   throw new Error(`Failed to fetch image: ${response.statusText}`);
+      // }
+      const base64 = await FileSystem.readAsStringAsync(imageUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+   
     
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.statusText}`);
-    }
-    
-    const blob = await response.blob();
+    const arrayBuffer = decode(base64);
     
     // Create a unique filename with timestamp
     const timestamp = Date.now();
@@ -84,7 +94,7 @@ export const uploadImageToSupabase = async (
     // Upload to Supabase storage using the correct bucket
     const { data, error } = await supabase.storage
       .from(bucketName)
-      .upload(fullPath, blob, {
+      .upload(fullPath, arrayBuffer, {
         contentType,
         upsert: false
       });
