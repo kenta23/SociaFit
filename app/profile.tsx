@@ -1,26 +1,45 @@
 import ActivityContent from '@/components/feeds/activities';
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
+import { Database } from '@/database.types';
+import { getAuthUser } from '@/utils/auth';
+import { supabase } from '@/utils/supabase';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 
 
 
 export default function Profile() {
 
     const colorScheme = useColorScheme() ?? 'light';
+    const router = useRouter();
+    const [activities, setActivities] = useState<Database['public']['Tables']['activities']['Row'][]>([]);
+
+    useEffect(() => { 
+        const getActivities = async () => { 
+            const user = await getAuthUser();
+
+            const { data } = await supabase.from('activities').select('*').eq('user_id', user.data.user?.id as string);
+
+            if(data) { 
+                setActivities(data);
+            }
+        }
+        getActivities();
+    }, []);
 
     return (
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
           <ScrollView style={styles.container}>  
               {/**QR CODE SCANNER */}
-              <Pressable style={styles.qrCodeScanner}>
-                <Ionicons name='qr-code-outline' size={28} color='#3591DD' />
+              <Pressable onPress={() => router.push('/my-qr-code')} style={styles.qrCodeScanner}>
+                <Ionicons name='qr-code-outline' size={28} color='#24B437' />
               </Pressable>
-           
+
 
             {/**Your Profile View */}
             <View style={styles.parent}>
@@ -62,7 +81,7 @@ export default function Profile() {
             {/**YOUR ACTIVITIES */}
             <View style={styles.activitiesContainer}>
                 <Text style={typography.subheading}>Your Activities</Text>
-                <ActivityContent />
+                <ActivityContent activities={activities} />
             </View>
             
             {/* Add bottom padding for better scrolling experience */}
@@ -90,7 +109,7 @@ const styles = StyleSheet.create({
         zIndex: 10,
         padding: 10,
         borderRadius: 10,
-        marginBottom: 10,
+        marginBottom: 12,
         width: 'auto',
         height: 60,
         justifyContent: 'center',

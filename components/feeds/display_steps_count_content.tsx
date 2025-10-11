@@ -20,8 +20,7 @@ interface StepData {
 }
 
 
-
-export default function DisplayStepsCountContent() {
+export default function DisplayStepsCountContent({ steps }: { steps: number }) {
   const { coordinates } = useStoreDistance();
   const [region, setRegion] = useState<Region>({...coordinates[0], latitudeDelta: 0.01, longitudeDelta: 0.01});
   const { currentSteps, targetSteps } = useStoreStepsCount();
@@ -35,7 +34,7 @@ export default function DisplayStepsCountContent() {
 
 
   const stepsCountData = useMemo<StepData[]>(() => {
-    const rawPercent = targetSteps === 0 ? 0 : (currentSteps / targetSteps) * 100;
+    const rawPercent = targetSteps === 0 ? 0 : (steps / targetSteps) * 100;
     const cappedPercent = Math.min(100, Math.max(0, Number.isFinite(rawPercent) ? rawPercent : 0));
     return [
         { value: cappedPercent, color: Colors[colorScheme].primary },
@@ -73,13 +72,14 @@ export default function DisplayStepsCountContent() {
 
 const styles = StyleSheet.create({ 
   container: { 
-      width: "100%",
-      maxWidth: 155,
-      minWidth: 110,
+
+      // maxWidth: 155,
+      // minWidth: 110,
       height: 160,
       borderWidth: 1,
       borderColor: '#54EE69',
       borderRadius: 8,
+      flex: 1,
       overflow: "hidden",
       justifyContent: "center",
       alignItems: "center",

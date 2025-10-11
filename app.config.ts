@@ -13,6 +13,20 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supportsTablet: true
   },
   android: {
+    intentFilters: [
+      { 
+         "action": "VIEW",
+         "autoVerify": true,
+         "data": [
+           {
+            "scheme": "https",
+            "host": "*.webapp.io",
+            "pathPrefix": "/sociafit"
+           }
+         ],
+         "category": ["BROWSABLE", "DEFAULT"]
+      }
+    ],
     package: "com.sociafit.app",
     newArchEnabled: true,
     adaptiveIcon: {
@@ -28,6 +42,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     "expo-router",
     "expo-sensors",
+    [
+      "expo-camera",
+      {
+        "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
+      }
+    ],
     [
       "expo-location",
       {

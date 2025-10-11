@@ -1,82 +1,188 @@
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
+import { Database } from '@/database.types';
+import { getAuthUser } from '@/utils/auth';
+import { getUserFollowingsData } from '@/utils/data';
+import { supabase } from '@/utils/supabase';
 import { Entypo, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import Snackbar from 'react-native-snackbar';
 import DisplayMapContent from './display_map_content';
 import DisplayStepsCountContent from './display_steps_count_content';
 
+interface ActivityContentProps { 
+    activities?: Database['public']['Tables']['activities']['Row'][];
+}
 
 
-export default function ActivityContent () { 
+export default function ActivityContent ({ activities }: ActivityContentProps) { 
    const colorScheme = useColorScheme() ?? 'light';
+   const [isLiked, setIsLiked] = useState(false);
+   const [photos, setPhotos] = useState<string[]>([]);
+   const [allActivities, setAllActivities] = useState<Database['public']['Tables']['activities']['Row'][]>([]);
+   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
+   const [likes, setLikes] = useState<Database['public']['Tables']['likes']['Row'][]>([]);
+   
+
+ //get photos from supabase storage bucket 
+ const getData = async () => { 
+    const data = await getUserFollowingsData();
+
+    if(data) { 
+      //pick only activity data
+       
+        setAllActivities(data);
+        setMediaUrls(data.map(act => act.mediaUrls as unknown as string[]).flat());
+        console.log('DATA', data);
+        setLikes(data.map((activity) => activity.likes as unknown as Database['public']['Tables']['likes']['Row'][]).flat());
+
+        console.log('data', data);
+        console.log('activities props', activities);
+    }
+  }
+
+   useEffect(() => { 
+    
+      getData();
+   }, [activities])
+
+
+   console.log('MEDIA URLS', mediaUrls);
+   console.log('likes', likes);
+   console.log('allActivities', allActivities);
+
+
+
+   const handleLike = async (post_id: number) => { 
+      setIsLiked(!isLiked);
+      const user = await getAuthUser();
+      
+      if (isLiked) { 
+         const {data, error } = await supabase.from('likes').delete().eq('activity', post_id).select('*');
+         if(error) { 
+            Snackbar.show({ 
+                text: 'Something went wrong',
+                duration: Snackbar.LENGTH_SHORT,
+                action: { 
+                    text: 'Close',
+                    onPress: () => { 
+                        Snackbar.dismiss();
+                    }
+                }
+            })
+         }
+         else { 
+            Snackbar.show({ 
+                text: 'unliked',
+                duration: Snackbar.LENGTH_SHORT,
+                action: { 
+                    text: 'Close',
+                    onPress: () => { 
+                        Snackbar.dismiss();
+                    }
+                }
+            });
+
+            getData();
+         }
+      }
+      else { 
+         const { data, error } = await supabase.from('likes').insert({ activity: post_id, user_id: user.data.user?.id as string }).select('*');
+         if(error) { 
+            Snackbar.show({ 
+                text: 'Something went wrong',
+                duration: Snackbar.LENGTH_SHORT,
+                action: { 
+                    text: 'Close',
+                    onPress: () => { 
+                        Snackbar.dismiss();
+                    }
+                }
+            });
+         }
+         else { 
+            Snackbar.show({ 
+                text: 'Liked',
+                duration: Snackbar.LENGTH_SHORT,
+                action: { 
+                    text: 'Close',
+                    onPress: () => { 
+                        Snackbar.dismiss();
+                    }
+                }
+            });
+
+            getData();
+         }
+      }
+   }
 
  return (
     <View style={{ gap: 10, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>            
+   
     {/**Activity 1 */}
-       <View style={[styles.activity, { backgroundColor: Colors[colorScheme].frameBackground, shadowColor: '#DBDADA', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }]}>
-         <View style={{ paddingHorizontal: 10, alignSelf: 'flex-start' }}>     
-           
-             <View style={styles.activityHeader}>   
-              <View style={styles.user}>
-                  <Image style={styles.userImage} contentFit="cover" source={require('@/assets/images/no-user.png')} />
-                 
-                 <View>
-                     <Text style={typography.medium}>Rusty Miguel O. Ramos</Text>
-                     {/**DATE POSTED */}
-                     <Text style={typography.small}>{(new Date()).getMonth() + 1}/{new Date().getDate()}/{new Date().getFullYear()}</Text>
-                 </View> 
-              </View>
+      {allActivities?.map((activity) => ( 
+          <View key={activity.post_id} style={[styles.activity, { backgroundColor: Colors[colorScheme].frameBackground, shadowColor: '#DBDADA', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.25, shadowRadius: 3.84 }]}>
+           <View style={{ paddingHorizontal: 10, alignSelf: 'flex-start' }}>     
+            
+              <View style={styles.activityHeader}>   
+                <View style={styles.user}>
+                   <Image style={styles.userImage} contentFit="cover" source={require('@/assets/images/no-user.png')} />
+                  
+                  <View>
+                      <Text style={typography.medium}>"Unknown User"</Text>
+                      {/**DATE POSTED */}
+                      <Text style={typography.small}>{new Date(activity.created_at).toLocaleDateString()}</Text>
+                  </View> 
+               </View>
+ 
+ 
+               <View style={styles.activityOption}>
+                   <Ionicons name='ellipsis-vertical' size={24} color='#3591DD' />
+               </View>
+            </View>
+          </View>
+ 
+ 
+ 
+          <View style={styles.activityContent}>
+               <Text style={typography.description}>{activity.content}</Text>
+                {/**ACTIVITY MEDIA */}
+                    <View style={styles.activityContentImageContainer}>
+                       {/**MAP CONTENT */}
+                         <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap', height: 'auto' }}>
+                            {activity.distance_travelled && <DisplayMapContent coordinates={activity.distance_travelled as { latitude: number; longitude: number }[]} />}
+                            {activity.steps_total && <DisplayStepsCountContent steps={activity.steps_total || 0} />      }            
+                         </View>
 
 
-              <View style={styles.activityOption}>
-                  <Ionicons name='ellipsis-vertical' size={24} color='#3591DD' />
-              </View>
-           </View>
-         </View>
-
-
-
-         <View style={styles.activityContent}>
-              <Text style={typography.description}>Content....</Text>
-               {/**ACTIVITY MEDIA */}
-                   <View style={styles.activityContentImageContainer}>
-                      {/**MAP CONTENT */}
-                        <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'nowrap', height: 'auto' }}>
-                           <DisplayMapContent />            
-                           <DisplayStepsCountContent />                      
-                        </View>
-
-                  {/** DISPLAY PHOTOS*/}
-                 
-                        {/* <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'nowrap' }}>
-                           <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                           <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />
-                        </View> */}
-                   </View>
-
-
-                   {/** NUMBER OF REACTIONS */}
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 18 }}> 
-                      <Entypo name="heart" size={16} color={Colors[colorScheme].green['600']} />
-                      <Text style={typography.medium}>10</Text>
-                </View>
-
-
-                {/**Reaction button */}
-                <Pressable style={[styles.reactionBtn, { borderColor: Colors[colorScheme].text['200'] }]}> 
-                      <Entypo name="heart-outlined" size={16} color={Colors[colorScheme].green['600']} />
-                      <Text style={[typography.medium, { color: Colors[colorScheme].green['600'] }]}>Like</Text>
-                </Pressable>
-
-         </View>
-      </View>
-
-
-
-
-
+                       {/** DISPLAY PHOTOS*/}
+                          <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'nowrap' }}>
+                            {mediaUrls ? mediaUrls.map((mediaUrl) => (
+                              <Image style={styles.activityContentImage} contentFit="cover" source={{ uri: mediaUrl }} />
+                            )) : <Image  style={styles.activityContentImage} contentFit="cover" source={require('@/assets/images/activityimage.jpg')} />}
+                         </View> 
+                    </View>
+ 
+ 
+                    {/** NUMBER OF REACTIONS */}
+                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 18 }}> 
+                       <Entypo name="heart" size={16} color={Colors[colorScheme].green['600']} />
+                       <Text style={typography.medium}>{likes?.length} likes</Text>
+                 </View>
+ 
+ 
+                 {/**Reaction button */}
+                 <Pressable onPress={() => handleLike(activity.id)} style={[styles.reactionBtn, { borderColor: Colors[colorScheme].text['200'] }]}> 
+                       <Entypo name={isLiked ? "heart" : "heart-outlined"} size={16} color={Colors[colorScheme].green['600']} />
+                       <Text style={[typography.medium, { color: Colors[colorScheme].green['600'] }]}>Like</Text>
+                 </Pressable>
+ 
+          </View>
+       </View>
+     ))} 
   </View>
  )
     
@@ -98,8 +204,8 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         gap: 10,
         borderRadius: 12,
+        height: 'auto',
         marginTop: 10,
-
         width: '100%',
     },
     activityContentImage: { 

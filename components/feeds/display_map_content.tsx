@@ -1,4 +1,3 @@
-import { useStoreDistance } from "@/utils/states";
 import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE, Region } from 'react-native-maps';
@@ -14,8 +13,7 @@ const DEFAULT_REGION: Region = {
 
   
 
-export default function DisplayMapContent() {
-  const { coordinates } = useStoreDistance();
+export default function DisplayMapContent({ coordinates }: { coordinates: { latitude: number; longitude: number }[] }) {
   const [region, setRegion] = useState<Region>({...coordinates[0], latitudeDelta: 0.01, longitudeDelta: 0.01});
 
 
@@ -53,10 +51,12 @@ export default function DisplayMapContent() {
 
 const styles = StyleSheet.create({ 
      container: { 
-         width: "100%",
-         maxWidth: 155,
-         minWidth: 110,
-         height: 160,
+        //  width: "100%",
+        //  maxWidth: 155,
+        //  minWidth: 110,
+        //  height: 160,
+         flex: 1,
+         height: 'auto',
          borderWidth: 1,
          borderColor: '#F3E266',
          borderRadius: 8,
