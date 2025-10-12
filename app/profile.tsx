@@ -1,9 +1,8 @@
 import ActivityContent from '@/components/feeds/activities';
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
-import { Database } from '@/database.types';
 import { getAuthUser } from '@/utils/auth';
-import { supabase } from '@/utils/supabase';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
@@ -12,33 +11,50 @@ import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
-
 export default function Profile() {
 
     const colorScheme = useColorScheme() ?? 'light';
     const router = useRouter();
-    const [activities, setActivities] = useState<Database['public']['Tables']['activities']['Row'][]>([]);
+    const [user, setUser] = useState<string | null>(null);
+
 
     useEffect(() => { 
-        const getActivities = async () => { 
+        const getUser = async () => { 
             const user = await getAuthUser();
-
-            const { data } = await supabase.from('activities').select('*').eq('user_id', user.data.user?.id as string);
-
-            if(data) { 
-                setActivities(data);
-            }
+            setUser(user.data.user?.id as string);
         }
-        getActivities();
+        getUser();
     }, []);
+
+    // useEffect(() => { 
+    //     const getActivities = async () => { 
+    //         const user = await getAuthUser();
+
+    //         const { data } = await supabase.from('activities').select('*').eq('user_id', user.data.user?.id as string);
+
+    //         if(data) { 
+    //             setActivities(data);
+    //         }
+    //     }
+    //     getActivities();
+    // }, []);
+
+    console.log('USER', user);
+
 
     return (
         <SafeAreaView edges={['bottom']} style={{ flex: 1 }}>
           <ScrollView style={styles.container}>  
               {/**QR CODE SCANNER */}
-              <Pressable onPress={() => router.push('/my-qr-code')} style={styles.qrCodeScanner}>
+           
+           <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center', justifyContent: 'flex-end' }}> 
+             <Pressable onPress={() => router.push('/personal-info')}>
+                 <FontAwesome5 name="user-cog" size={24} color="black" />
+              </Pressable>
+             <Pressable onPress={() => router.push('/my-qr-code')} style={styles.qrCodeScanner}>
                 <Ionicons name='qr-code-outline' size={28} color='#24B437' />
               </Pressable>
+           </View>
 
 
             {/**Your Profile View */}
@@ -81,7 +97,7 @@ export default function Profile() {
             {/**YOUR ACTIVITIES */}
             <View style={styles.activitiesContainer}>
                 <Text style={typography.subheading}>Your Activities</Text>
-                <ActivityContent activities={activities} />
+                <ActivityContent userid={user as string} />
             </View>
             
             {/* Add bottom padding for better scrolling experience */}
@@ -103,20 +119,11 @@ const styles = StyleSheet.create({
          gap: 10,
     },
     qrCodeScanner: {
-        position: 'absolute',
-        top: 10,
-        right: 10,
-        zIndex: 10,
-        padding: 10,
-        borderRadius: 10,
-        marginBottom: 12,
-        width: 'auto',
         height: 60,
         justifyContent: 'center',
     },
     /**Your Profile View Styles */
     parent: {
-        marginTop: 25,
         paddingVertical: 12,
         height: 'auto',
     },

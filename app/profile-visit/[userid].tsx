@@ -110,8 +110,8 @@ export default function ProfileVisit() {
             {/**YOUR ACTIVITIES */}
           <View style={styles.activitiesContainer}>
               <Text style={typography.subheading}>Your Activities</Text>
-              <ActivityContent activities={
-                userdata[0].activities?.filter((activity) => activity.user_id === userid)
+              <ActivityContent userid={
+                userdata[0].activities?.filter((activity) => activity.user_id === userid)?.[0]?.user_id ?? ''
                }/>
           </View>
           

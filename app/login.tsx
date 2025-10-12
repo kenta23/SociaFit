@@ -1,5 +1,5 @@
 import { supabase } from '@/utils/supabase';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
 import { makeRedirectUri } from 'expo-auth-session';
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import { Image } from 'expo-image';
@@ -33,6 +33,16 @@ export default function Login() {
     fetchUser();
    }, []);
 
+   GoogleSignin.configure({
+    webClientId: '49993852450-49f8n1c7qhd8dnsmsd00ro7g6o0smto3.apps.googleusercontent.com', // client ID of type WEB for your server. Required to get the `idToken` on the user object, and for offline access.
+    scopes: [
+      /* what APIs you want to access on behalf of the user, default is email and profile
+      this is just an example, most likely you don't need this option at all! */
+      'https://www.googleapis.com/auth/drive.readonly',
+    ],
+    offlineAccess: false, // if you want to access Google API on behalf of the user FROM YOUR SERVER
+    accountName: 'SociaFit', // [Android] specifies an account name on the device that should be used
+  });
 
    GoogleSignin.configure({ 
      scopes: ['email'],
@@ -51,24 +61,49 @@ export default function Login() {
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
   
       // Sign in
-      const { data: signInResult } = await GoogleSignin.signIn();
-  
-      if (!signInResult?.idToken) {
-        Alert.alert('Login Failed', 'No ID Token was returned');
-        return;
-      }
-    
-      // Send to Supabase Auth
-      const { data, error } = await supabase.auth.signInWithIdToken({ 
-        provider: 'google', 
-        token: signInResult.idToken 
-      });
-  
-      if (error) {
-        Alert.alert('Supabase Error', error?.message);
-      } else {
-        Alert.alert('Success!', `Welcome, ${data?.user?.email}`);
-      }
+
+      const signIn = async () => {
+        try {
+          await GoogleSignin.hasPlayServices();
+          const response = await GoogleSignin.signIn();
+          if (isSuccessResponse(response)) {
+            console.log('signInResult', response.data);
+            // Send to Supabase Auth
+            const { data, error } = await supabase.auth.signInWithIdToken({
+              provider: 'google',
+              token: response.data?.idToken as string,
+            });
+
+            if (error) {
+              Alert.alert('Supabase Error', error?.message);
+            } else {
+              Alert.alert('Success!', `Welcome, ${data?.user?.email}`);
+            }
+          } else {
+            Alert.alert('Login Failed', 'No ID Token was returned');
+            return;
+          }
+        } catch (error) {
+          if (isErrorWithCode(error)) {
+            switch (error.code) {
+              case statusCodes.IN_PROGRESS:
+                Alert.alert('Login In Progress', 'You are already logging in');
+                break;
+              case statusCodes.PLAY_SERVICES_NOT_AVAILABLE:
+                Alert.alert('Play Services Not Available', 'Play services are not available or outdated');
+                break;
+              default:
+                Alert.alert('Login Error', 'Something went wrong during Google Sign-In' + error?.code);
+            }
+          } else {
+            Alert.alert('Login Failed', 'No ID Token was returned');
+            return;
+          }
+        }
+      };
+
+      signIn();
+
     } catch (err: any) {
       if (err.code === statusCodes.SIGN_IN_CANCELLED) {
         // user cancelled the login flow

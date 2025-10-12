@@ -23,7 +23,7 @@ interface StepData {
 export default function DisplayStepsCountContent({ steps }: { steps: number }) {
   const { coordinates } = useStoreDistance();
   const [region, setRegion] = useState<Region>({...coordinates[0], latitudeDelta: 0.01, longitudeDelta: 0.01});
-  const { currentSteps, targetSteps } = useStoreStepsCount();
+  const { targetSteps } = useStoreStepsCount();
   const colorScheme = useColorScheme() ?? 'light';
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default function DisplayStepsCountContent({ steps }: { steps: number }) {
         { value: cappedPercent, color: Colors[colorScheme].primary },
         { value: 100 - cappedPercent, color: 'lightgray' }
     ];
-}, [currentSteps, targetSteps, colorScheme]);
+}, [steps, targetSteps, colorScheme]);
  
 
   return (
@@ -63,7 +63,7 @@ export default function DisplayStepsCountContent({ steps }: { steps: number }) {
            />
          )}
        />
-       <Text style={styles.stepsCountText}>{`${currentSteps}/${targetSteps} steps`}</Text>
+       <Text style={styles.stepsCountText}>{`${steps}/${targetSteps} steps`}</Text>
     </View>
  </View>
   )
@@ -71,10 +71,9 @@ export default function DisplayStepsCountContent({ steps }: { steps: number }) {
 
 
 const styles = StyleSheet.create({ 
-  container: { 
-
-      // maxWidth: 155,
-      // minWidth: 110,
+  container: {
+      width: "100%",
+      minWidth: 110,
       height: 160,
       borderWidth: 1,
       borderColor: '#54EE69',

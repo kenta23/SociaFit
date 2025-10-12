@@ -77,6 +77,7 @@ export default function RootLayout() {
           <Stack.Screen name="share-activity" options={{ headerShown: true, title: 'Share Activity', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
           <Stack.Screen name="my-qr-code" options={{ headerShown: true, title: 'My QR Code', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
           <Stack.Screen name="profile-visit/[userid]" options={{ headerShown: true, title: 'Profile Visit', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
+          <Stack.Screen name="personal-info" options={{ headerShown: true, title: 'Personal Info', gestureEnabled: true, headerBackButtonDisplayMode: 'generic' }} />
         </Stack>
         <StatusBar style="auto" />
        </BottomSheetHost>

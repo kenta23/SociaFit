@@ -51,12 +51,11 @@ export default function DisplayMapContent({ coordinates }: { coordinates: { lati
 
 const styles = StyleSheet.create({ 
      container: { 
-        //  width: "100%",
-        //  maxWidth: 155,
-        //  minWidth: 110,
-        //  height: 160,
+         width: "100%",
+         minWidth: 110,
+         height: 160,
          flex: 1,
-         height: 'auto',
+        //  height: 'auto',
          borderWidth: 1,
          borderColor: '#F3E266',
          borderRadius: 8,

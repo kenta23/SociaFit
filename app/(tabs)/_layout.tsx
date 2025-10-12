@@ -17,6 +17,8 @@ import { Platform, Pressable } from 'react-native';
 type WorkoutSplitType = (Database['public']['Tables']['workout_splits']['Row'] & { workout_days: Database['public']['Tables']['workout_days']['Row'] } & { workout_categories: Database['public']['Tables']['workout_categories']['Row']})[];
 
 
+
+
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
@@ -26,6 +28,14 @@ export default function TabLayout() {
 
 
   console.log('data from zustand', data);
+
+
+
+ function HeaderBackIcon() { 
+    return (
+     <Pressable style={{ marginLeft: 8 }} onPress={() => router.back()}><Image source={require('@/assets/back button.svg')} style={{ width: 26, height: 26 }} /></Pressable>
+    )
+ }
 
 
   useEffect(() => {
@@ -107,7 +117,7 @@ export default function TabLayout() {
         options={{
           headerShown: true,
           headerBackButtonDisplayMode: 'default',
-          headerLeft: () => <Pressable style={{ marginLeft: 8 }} onPress={() => router.back()}><Image source={require('@/assets/back button.svg')} style={{ width: 26, height: 26 }} /></Pressable>,
+          headerLeft: HeaderBackIcon,
           title: 'Feeds',
           tabBarIcon: ({ color }) => <MaterialCommunityIcons name="newspaper-variant-outline" size={22} color={color} />,
         }}
@@ -120,7 +130,7 @@ export default function TabLayout() {
           title: 'History',
           headerShown: true,  
           headerBackButtonDisplayMode: 'default',
-          headerLeft: () => <Pressable style={{ marginLeft: 8 }} onPress={() => router.back()}><Image source={require('@/assets/back button.svg')} style={{ width: 26, height: 26 }} /></Pressable>,
+          headerLeft: HeaderBackIcon,
           tabBarIcon: ({ color }) => <FontAwesome5 name="history" size={22} color={color} />,
         }}
       />
@@ -133,7 +143,7 @@ export default function TabLayout() {
         title: 'Settings',
         headerShown: true,  
         headerBackButtonDisplayMode: 'default',
-        headerLeft: () => <Pressable style={{ marginLeft: 8 }} onPress={() => router.back()}><Image source={require('@/assets/back button.svg')} style={{ width: 26, height: 26 }} /></Pressable>,
+        headerLeft: HeaderBackIcon,
         tabBarIcon: ({ color }) => <Ionicons name="settings-outline" size={22} color={color} />,
        }} />
 

@@ -2,10 +2,11 @@ import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
 import { Database } from '@/database.types';
 import { getAuthUser } from '@/utils/auth';
-import { getUserFollowingsData } from '@/utils/data';
+import { getFeedActivities, getUserActivities } from '@/utils/data';
 import { supabase } from '@/utils/supabase';
 import { Entypo, Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { usePathname } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, useColorScheme, View } from 'react-native';
 import Snackbar from 'react-native-snackbar';
@@ -17,41 +18,47 @@ interface ActivityContentProps {
 }
 
 
-export default function ActivityContent ({ activities }: ActivityContentProps) { 
+export default function ActivityContent ({ userid }: { userid: string }) { 
    const colorScheme = useColorScheme() ?? 'light';
    const [isLiked, setIsLiked] = useState(false);
-   const [photos, setPhotos] = useState<string[]>([]);
    const [allActivities, setAllActivities] = useState<Database['public']['Tables']['activities']['Row'][]>([]);
    const [mediaUrls, setMediaUrls] = useState<string[]>([]);
    const [likes, setLikes] = useState<Database['public']['Tables']['likes']['Row'][]>([]);
-   
+   const pathname = usePathname();
 
- //get photos from supabase storage bucket 
+
+
+   console.log('userid from activities', userid);
+
+
  const getData = async () => { 
-    const data = await getUserFollowingsData();
+
+    const data = pathname === '/feeds' ? await getFeedActivities(userid) : await getUserActivities(userid);
+  
 
     if(data) { 
       //pick only activity data
-       
         setAllActivities(data);
+
         setMediaUrls(data.map(act => act.mediaUrls as unknown as string[]).flat());
         console.log('DATA', data);
         setLikes(data.map((activity) => activity.likes as unknown as Database['public']['Tables']['likes']['Row'][]).flat());
 
         console.log('data', data);
-        console.log('activities props', activities);
+       
     }
   }
 
    useEffect(() => { 
     
-      getData();
-   }, [activities])
+        getData();
+ 
+   }, [])
 
 
-   console.log('MEDIA URLS', mediaUrls);
-   console.log('likes', likes);
-   console.log('allActivities', allActivities);
+//    console.log('MEDIA URLS', mediaUrls);
+//    console.log('likes', likes);
+//    console.log('allActivities', allActivities);
 
 
 
@@ -60,8 +67,12 @@ export default function ActivityContent ({ activities }: ActivityContentProps) {
       const user = await getAuthUser();
       
       if (isLiked) { 
-         const {data, error } = await supabase.from('likes').delete().eq('activity', post_id).select('*');
-         if(error) { 
+         const { data, error } = await supabase
+           .from('likes')
+           .delete()
+           .match({ activity: post_id, user_id: user.data.user?.id as string })
+           .select('*');
+         if (error) { 
             Snackbar.show({ 
                 text: 'Something went wrong',
                 duration: Snackbar.LENGTH_SHORT,
@@ -132,7 +143,7 @@ export default function ActivityContent ({ activities }: ActivityContentProps) {
                    <Image style={styles.userImage} contentFit="cover" source={require('@/assets/images/no-user.png')} />
                   
                   <View>
-                      <Text style={typography.medium}>"Unknown User"</Text>
+                      <Text style={typography.medium}>Unknown User</Text>
                       {/**DATE POSTED */}
                       <Text style={typography.small}>{new Date(activity.created_at).toLocaleDateString()}</Text>
                   </View> 
@@ -152,7 +163,7 @@ export default function ActivityContent ({ activities }: ActivityContentProps) {
                 {/**ACTIVITY MEDIA */}
                     <View style={styles.activityContentImageContainer}>
                        {/**MAP CONTENT */}
-                         <View style={{ flexDirection: 'row', gap: 10, flexWrap: 'wrap', height: 'auto' }}>
+                         <View style={{ flexDirection: 'row', gap: 10, height: 'auto' }}>
                             {activity.distance_travelled && <DisplayMapContent coordinates={activity.distance_travelled as { latitude: number; longitude: number }[]} />}
                             {activity.steps_total && <DisplayStepsCountContent steps={activity.steps_total || 0} />      }            
                          </View>
@@ -176,8 +187,8 @@ export default function ActivityContent ({ activities }: ActivityContentProps) {
  
                  {/**Reaction button */}
                  <Pressable onPress={() => handleLike(activity.id)} style={[styles.reactionBtn, { borderColor: Colors[colorScheme].text['200'] }]}> 
-                       <Entypo name={isLiked ? "heart" : "heart-outlined"} size={16} color={Colors[colorScheme].green['600']} />
-                       <Text style={[typography.medium, { color: Colors[colorScheme].green['600'] }]}>Like</Text>
+                       <Entypo name={isLiked || likes.some((like) => like.activity === activity.id) ? "heart" : "heart-outlined"} size={16} color={Colors[colorScheme].green['600']} />
+                       <Text style={[typography.medium, { color: Colors[colorScheme].green['600'] }]}>{isLiked || likes.some((like) => like.activity === activity.id) ? "Unlike" : "Like"}</Text>
                  </Pressable>
  
           </View>
