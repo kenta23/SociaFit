@@ -28,6 +28,8 @@ export const getUserAvatar = async (): Promise<string | null> => {
 }
 
 export const getFeedActivities = async (userid: string) => {  
+
+  console.log('userid from feeds', userid);
  //for followed users
  const user = await getAuthUser();
  const { data, error } = await supabase.from('following').select('*').eq('user_id', userid ?? (user.data.user?.id as string));
@@ -172,4 +174,48 @@ export const getUserActivities = async (userid: string) => {
        return enrichData.flat();
     }
     return [];
+}
+
+
+export const getUserDetails = async (userid?: string) => { 
+   const user = userid ?? (await getAuthUser()).data.user?.id as string;
+
+   console.log('user from userdetails', user);
+
+   const { data: followers, error: followersError } = await supabase.from('following').select('*').eq('user_followed', user as string);
+
+   if (followersError) { 
+    console.log('followersError', followersError);
+   }
+
+
+
+   const { data: activities, error: activitiesError } = await supabase.from('activities').select('*', { count: 'exact', head: true }).eq('user_id', user as string);
+
+   const { data: userData, error: userDataError } = await supabase.from('userdata').select('*').eq('user_id', user as string).single();
+   
+   const { data: authUser, error: authUserError } = await getAuthUser();
+  
+
+    
+   console.log('name from userdetails', userData?.full_name);
+
+   if (activities) { 
+     const countActivityLikes = await Promise.all(activities.map(async (activity) => { 
+        const { data: totalActivityLikes, error: totalActivityLikesError } = await supabase.from('likes').select('*', { count: 'exact', head: true }).eq('activity', activity.id as number);
+
+        if(totalActivityLikesError) { 
+          console.log('totalActivityLikesError', totalActivityLikesError);
+        }
+
+        return totalActivityLikes;
+      })
+    )
+
+    return { followers, totalLikes: countActivityLikes, countActivities: activities, name: userData?.full_name, email: authUser.user?.email };
+   }
+
+
+   return;
+   
 }

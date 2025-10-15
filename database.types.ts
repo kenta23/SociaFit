@@ -152,6 +152,7 @@ export type Database = {
         Row: {
           created_at: string
           ds_travelled: number | null
+          full_name: string | null
           id: number
           monthly_steps: number | null
           qr_code: string | null
@@ -164,6 +165,7 @@ export type Database = {
         Insert: {
           created_at?: string
           ds_travelled?: number | null
+          full_name?: string | null
           id?: number
           monthly_steps?: number | null
           qr_code?: string | null
@@ -176,6 +178,7 @@ export type Database = {
         Update: {
           created_at?: string
           ds_travelled?: number | null
+          full_name?: string | null
           id?: number
           monthly_steps?: number | null
           qr_code?: string | null

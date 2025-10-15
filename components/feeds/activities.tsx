@@ -13,10 +13,6 @@ import Snackbar from 'react-native-snackbar';
 import DisplayMapContent from './display_map_content';
 import DisplayStepsCountContent from './display_steps_count_content';
 
-interface ActivityContentProps { 
-    activities?: Database['public']['Tables']['activities']['Row'][];
-}
-
 
 export default function ActivityContent ({ userid }: { userid: string }) { 
    const colorScheme = useColorScheme() ?? 'light';
@@ -33,8 +29,9 @@ export default function ActivityContent ({ userid }: { userid: string }) {
 
  const getData = async () => { 
 
-    const data = pathname === '/feeds' ? await getFeedActivities(userid) : await getUserActivities(userid);
+    const data = pathname === '/feeds' ? await getFeedActivities(userid) : pathname === '/profile' ? await getUserActivities(userid) : null;
   
+    console.log('pathname', pathname);
 
     if(data) { 
       //pick only activity data
@@ -45,7 +42,6 @@ export default function ActivityContent ({ userid }: { userid: string }) {
         setLikes(data.map((activity) => activity.likes as unknown as Database['public']['Tables']['likes']['Row'][]).flat());
 
         console.log('data', data);
-       
     }
   }
 

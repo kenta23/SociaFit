@@ -2,6 +2,7 @@ import ActivityContent from '@/components/feeds/activities';
 import { Colors } from '@/constants/Colors';
 import { typography } from '@/constants/typography';
 import { getAuthUser } from '@/utils/auth';
+import { getUserDetails } from '@/utils/data';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
@@ -11,34 +12,57 @@ import { Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 
+interface UserDetailsProps {
+    followers: {
+      created_at: string;
+      id: number;
+      user_followed: string | null;
+      user_id: string | null;
+    }[] | null;
+  
+    totalLikes: {
+      activity: number | null;
+      created_at: string;
+      id: number;
+      user_id: string | null;
+    }[] | null;
+  
+    countActivities: {
+      content: string | null;
+      created_at: string;
+      distance_travelled: unknown | null; 
+      id: number;
+      post_id: string | null;
+      steps_total: number | null;
+      user_id: string | null;
+    }[];
+  
+    name?: string | null;
+    email?: string;
+  }
+  
+
 export default function Profile() {
 
     const colorScheme = useColorScheme() ?? 'light';
     const router = useRouter();
     const [user, setUser] = useState<string | null>(null);
+    const [userDetails, setUserDetails] = useState<UserDetailsProps | null>(null);
 
 
     useEffect(() => { 
         const getUser = async () => { 
             const user = await getAuthUser();
             setUser(user.data.user?.id as string);
+
+            const data = await getUserDetails();
+
+            setUserDetails(data as unknown as UserDetailsProps);
         }
         getUser();
     }, []);
 
-    // useEffect(() => { 
-    //     const getActivities = async () => { 
-    //         const user = await getAuthUser();
-
-    //         const { data } = await supabase.from('activities').select('*').eq('user_id', user.data.user?.id as string);
-
-    //         if(data) { 
-    //             setActivities(data);
-    //         }
-    //     }
-    //     getActivities();
-    // }, []);
-
+  
     console.log('USER', user);
 
 
@@ -65,25 +89,25 @@ export default function Profile() {
                         <Image style={styles.frameChild} contentFit="cover" source={require('@/assets/images/no-user.png')} />
                  
                         <View style={styles.nameContainer}>
-                            <Text style={[typography.heading]}>Rusty Miguel O. Ramos</Text>
-                            <Text style={typography.medium}>@dreyyy</Text>
+                            <Text style={[typography.heading]}>{userDetails?.name}</Text>
+                            <Text style={typography.medium}>{userDetails?.email}</Text>
                         </View>
                     </View>
 
 
                     <View style={[styles.frameGroup, styles.frameFlexBox]}>
                         <View style={[styles.groupFlexBox]}>
-                            <Text style={[typography.medium]}>400</Text>
+                            <Text style={[typography.medium]}>{userDetails?.totalLikes?.length || 0}</Text>
                             <Text style={[typography.description]}>Total likes</Text>
                         </View>
 
                         <View style={[styles.groupFlexBox]}>
-                            <Text style={[typography.medium]}>26</Text>
+                            <Text style={[typography.medium]}>{userDetails?.countActivities?.length || 0}</Text>
                             <Text style={[typography.description]}>Activities</Text>
                         </View>
 
                         <View style={styles.groupFlexBox}>
-                            <Text style={[typography.medium]}>55</Text>
+                            <Text style={[typography.medium]}>{userDetails?.followers?.length || 0}</Text>
                             <Text style={[typography.description]}>Followers</Text>
                         </View>
 

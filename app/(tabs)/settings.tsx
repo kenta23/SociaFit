@@ -230,7 +230,8 @@ console.log('STORE WORKOUT SPLIT', storeWorkoutSplit);
         <ScrollView style={[containerStyles.container, { gap: 12, paddingTop: 12 }]}>
             <Pressable style={[styles.profileBtn, { backgroundColor: Colors[colorScheme].frameBackground }]}>
               {/* Profile */}
-              <View style={{ flexDirection: 'row', gap: 8 }}>
+             <Pressable onPress={() => router.push('/profile')}>
+             <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Image contentFit='cover' source={require('@/assets/images/user-default.png')} style={{ width: 50, height: 50, borderRadius: 100 }} />
 
                 <View style={{ flexDirection: 'column', gap: 4 }}>
@@ -238,6 +239,7 @@ console.log('STORE WORKOUT SPLIT', storeWorkoutSplit);
                   <Text style={typography.description}>Profile, Your Activity, and more</Text>
                 </View>
               </View>
+             </Pressable>
 
               {/** Icon */}
               <FontAwesome5 name="chevron-right" size={15} color={Colors[colorScheme].text} />

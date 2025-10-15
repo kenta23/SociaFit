@@ -1,20 +1,34 @@
 import ActivityContent from '@/components/feeds/activities';
 import { Colors } from '@/constants/Colors';
+import { getAuthUser } from '@/utils/auth';
 import { containerStyles } from '@/utils/styles';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Feeds() {
   const colorScheme = useColorScheme() ?? 'light';
   const router = useRouter();
+  const user =  getAuthUser();
+  const [userid, setUserid] = useState<string | null>(null);
+
+  useEffect(() => { 
+    const getUser = async () => { 
+      const user = await getAuthUser();
+      setUserid(user.data.user?.id as string);
+    }
+    getUser();
+  }, []);
+
+
+  
 
   return (
     <SafeAreaView  style={[containerStyles.container, {backgroundColor: Colors[colorScheme].background}]}>
            <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}> 
-               <ActivityContent />
+               <ActivityContent userid={userid as string} />
 
             </ScrollView> 
         
