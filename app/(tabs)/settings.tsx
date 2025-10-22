@@ -1,524 +1,751 @@
-import { Colors } from '@/constants/Colors';
-import { typography } from '@/constants/typography';
-import { useBottomSheet } from '@/library/bottomsheetprovider';
-import { useStoreWorkoutSplits } from '@/utils/states';
-import { containerStyles } from '@/utils/styles';
-import { supabase } from '@/utils/supabase';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import BottomSheet, { BottomSheetScrollView, BottomSheetView } from '@gorhom/bottom-sheet';
-import Checkbox from 'expo-checkbox';
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, Modal, Pressable, ScrollView, StyleSheet, Text, useColorScheme, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import ChangeStepGoal from '../settings/change-step-goal';
-import UnitMeasure from '../settings/unit-measure';
-
-
+import { Colors } from "@/constants/Colors";
+import { typography } from "@/constants/typography";
+import { useBottomSheet } from "@/library/bottomsheetprovider";
+import { useStoreWorkoutSplits } from "@/utils/states";
+import { containerStyles } from "@/utils/styles";
+import { supabase } from "@/utils/supabase";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import BottomSheet, {
+  BottomSheetScrollView,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
+import Checkbox from "expo-checkbox";
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useColorScheme,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import ChangeStepGoal from "../settings/change-step-goal";
+import UnitMeasure from "../settings/unit-measure";
 
 export default function settings() {
-  const colorScheme = useColorScheme() ?? 'light';
-  const [openModal, setOpenModal] = useState<{ [key: number]: boolean }>({});
-  const [daysOfWeek] = useState([
-    {
-      id: 1,
-      name: 'Monday',
-    },
-    {
-      id: 2,
-      name: 'Tuesday',
-    },
-    {
-      id: 3,
-      name: 'Wednesday',
-    },
-    {
-      id: 4,
-      name: 'Thursday',
-    },
-    {
-      id: 5,
-      name: 'Friday',
-    },
-    {
-      id: 6,
-      name: 'Saturday',
-    },
-    {
-      id: 7,
-      name: 'Sunday',
-    },
-  ]);
+	const colorScheme = useColorScheme() ?? "light";
+	const [openModal, setOpenModal] = useState<{ [key: number]: boolean }>({});
+	const [daysOfWeek] = useState([
+		{
+			id: 1,
+			name: "Monday",
+		},
+		{
+			id: 2,
+			name: "Tuesday",
+		},
+		{
+			id: 3,
+			name: "Wednesday",
+		},
+		{
+			id: 4,
+			name: "Thursday",
+		},
+		{
+			id: 5,
+			name: "Friday",
+		},
+		{
+			id: 6,
+			name: "Saturday",
+		},
+		{
+			id: 7,
+			name: "Sunday",
+		},
+	]);
 
-  // const [workoutSplits, setWorkoutSplits] = useState<any[] | null>([]);
-  // const [workoutCategories, setWorkoutCategories] = useState<Database['public']['Tables']['workout_categories']['Row'][] | null>([]);
-  const [storeWorkoutSplit, setStoreWorkoutSplit] = useState<{id: number, checked: boolean}[]>([]);
-  const { workoutSplits, setWorkoutSplits, setCategories, categories } = useStoreWorkoutSplits();
-  const bottomSheetRef = useRef<BottomSheet>(null);
-  const [activeSheet, setActiveSheet] = useState<'Health Details' | 'Change Step Goal' | 'Unit Measure' | null>(null);
-  const { open } = useBottomSheet();
+	// const [workoutSplits, setWorkoutSplits] = useState<any[] | null>([]);
+	// const [workoutCategories, setWorkoutCategories] = useState<Database['public']['Tables']['workout_categories']['Row'][] | null>([]);
+	const [storeWorkoutSplit, setStoreWorkoutSplit] = useState<
+		{ id: number; checked: boolean }[]
+	>([]);
+	const { workoutSplits, setWorkoutSplits, setCategories, categories } =
+		useStoreWorkoutSplits();
+	const bottomSheetRef = useRef<BottomSheet>(null);
+	const [activeSheet, setActiveSheet] = useState<
+		"Health Details" | "Change Step Goal" | "Unit Measure" | null
+	>(null);
+	const { open } = useBottomSheet();
 
+	const snapPoints = useMemo(() => ["50%", "75%", "100%"], []);
 
-  const snapPoints = useMemo(() => ["50%", "75%", "100%"], []);
+	console.log("workoutSplitsState", workoutSplits);
 
-
-  console.log('workoutSplitsState', workoutSplits);
-
-  
-  const fetchWorkoutSplits = async () => {
-    const user = await supabase.auth.getUser();
-    // Query workout_splits with related workout_categories
-    const { data: splits, error: workoutSplitsError } = await supabase
-      .from('workout_splits')
-      .select(`
+	const fetchWorkoutSplits = async () => {
+		const user = await supabase.auth.getUser();
+		// Query workout_splits with related workout_categories
+		const { data: splits, error: workoutSplitsError } = await supabase
+			.from("workout_splits")
+			.select(`
         *,
         workout_days(*),
         workout_categories(*)
-      `).eq('workout_days.user_id', user.data.user?.id as string);
+      `)
+			.eq("workout_days.user_id", user.data.user?.id as string);
 
+		const { data: categories, error: workoutCategoriesError } = await supabase
+			.from("workout_categories")
+			.select("*");
 
+		setWorkoutSplits(splits as any);
 
-    const { data: categories, error: workoutCategoriesError } = await supabase
-      .from('workout_categories')
-      .select('*');
+		// Initialize categories with checked status based on existing workout splits
+		if (categories) {
+			setCategories(categories);
+		}
 
-    setWorkoutSplits(splits as any);
+		console.log("ERROR", workoutSplitsError);
+	};
 
-    // Initialize categories with checked status based on existing workout splits
-    if (categories) {
-      setCategories(categories);
-    }
+	useEffect(() => {
+		fetchWorkoutSplits();
+		// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	}, [fetchWorkoutSplits]);
 
-    console.log('ERROR', workoutSplitsError);
-  }
+	async function handleWorkoutDay({
+		workoutDayId,
+		workoutId,
+	}: {
+		workoutDayId: number;
+		workoutId: number;
+	}) {
+		try {
+			console.log("new work out splits", storeWorkoutSplit);
+			const filteredWorkoutSplits = storeWorkoutSplit
+				.filter((item) => item.checked)
+				.map((item) => item.id); //only includes item with check marked and just return the id
 
+			const workoutDay = workoutDayId;
 
-  useEffect(() => {
-    fetchWorkoutSplits();
-  }, []);
+			const { data: oldWorkoutSplits, error: oldWorkoutSplitsError } =
+				await supabase
+					.from("workout_splits")
+					.select("*")
+					.eq("workout_id", workoutDay);
+			console.log("OLD WORKOUT SPLITS", oldWorkoutSplits);
 
+			const existingSplits = oldWorkoutSplits?.some((split) =>
+				filteredWorkoutSplits.includes(split.category_id as number),
+			); //checking if no exisiting workout splits
 
-  async function handleWorkoutDay({workoutDayId, workoutId}: { workoutDayId: number, workoutId: number }) { 
-     try {
+			console.log("existingSplits", existingSplits);
 
-      console.log('new work out splits', storeWorkoutSplit);
-      const filteredWorkoutSplits = storeWorkoutSplit.filter(item => item.checked).map(item => item.id); //only includes item with check marked and just return the id
-      
-      const workoutDay = workoutDayId;
+			console.log("filteredWorkoutSplits", filteredWorkoutSplits);
+			const checkUnmatchedWorkoutSplits =
+				(oldWorkoutSplits?.length &&
+					oldWorkoutSplits.filter(
+						(split) =>
+							!filteredWorkoutSplits.includes(split.category_id as number),
+					)) ||
+				[];
 
+			console.log("checkUnmatchedWorkoutSplits", checkUnmatchedWorkoutSplits);
+			// Insert new workout splits
+			const workoutSplitInserts = filteredWorkoutSplits.map((categoryId) => ({
+				category_id: categoryId,
+				workout_id: workoutDay,
+			}));
 
-      const { data: oldWorkoutSplits, error: oldWorkoutSplitsError } = await supabase.from('workout_splits').select('*').eq('workout_id', workoutDay);
-      console.log('OLD WORKOUT SPLITS', oldWorkoutSplits);
+			if (checkUnmatchedWorkoutSplits.length) {
+				const { data: deleteWorkoutSplits, error: deleteWorkoutSplitsError } =
+					await supabase
+						.from("workout_splits")
+						.delete()
+						.in(
+							"category_id",
+							checkUnmatchedWorkoutSplits.map(
+								(item) => item.category_id as number,
+							),
+						)
+						.eq("workout_id", workoutDay)
+						.select("*");
 
-      const existingSplits = oldWorkoutSplits?.some(split => filteredWorkoutSplits.includes(split.category_id as number)); //checking if no exisiting workout splits 
+				console.log("DELETED WORKOUT SPLITS", deleteWorkoutSplits);
+				console.log("ERROR deleteWorkoutSplitsError", deleteWorkoutSplitsError);
 
-      console.log('existingSplits', existingSplits);
+				setOpenModal((prev) => ({ ...prev, [workoutId]: false }));
+				setStoreWorkoutSplit([]);
+				Alert.alert("Success!", "Deleted one record");
+			} else {
+				const { data: newWorkoutSplitsData, error: newWorkoutSplitsError } =
+					await supabase
+						.from("workout_splits")
+						.upsert(workoutSplitInserts, {
+							onConflict: "category_id, workout_id",
+						})
+						.select("*");
 
-              console.log('filteredWorkoutSplits', filteredWorkoutSplits);
-              const checkUnmatchedWorkoutSplits = oldWorkoutSplits?.length && oldWorkoutSplits.filter(split => !filteredWorkoutSplits.includes(split.category_id as number)) || [];
-    
-              console.log('checkUnmatchedWorkoutSplits', checkUnmatchedWorkoutSplits);
-              // Insert new workout splits
-              const workoutSplitInserts = filteredWorkoutSplits.map(categoryId => ({
-                category_id: categoryId,
-                workout_id: workoutDay
-              }));
+				console.log("NEW WORKOUT SPLITS", newWorkoutSplitsData);
 
+				if (newWorkoutSplitsData) {
+					Alert.alert("Success!", "Saved");
 
-             if (checkUnmatchedWorkoutSplits.length) { 
-                const { data: deleteWorkoutSplits, error: deleteWorkoutSplitsError } = await supabase
-                .from('workout_splits')
-                .delete()
-                .in('category_id', checkUnmatchedWorkoutSplits.map(item => item.category_id as number))
-                .eq('workout_id', workoutDay)
-                .select('*');
+					setOpenModal((prev) => ({ ...prev, [workoutId]: false }));
+					setStoreWorkoutSplit([]);
+				}
 
-                console.log('DELETED WORKOUT SPLITS', deleteWorkoutSplits);
-                console.log('ERROR deleteWorkoutSplitsError', deleteWorkoutSplitsError);
+				if (newWorkoutSplitsError) {
+					Alert.alert("Error!", newWorkoutSplitsError.message);
+				}
+			}
 
-                setOpenModal(prev => ({ ...prev, [workoutId]: false }));
-                setStoreWorkoutSplit([]);
-                Alert.alert('Success!', 'Deleted one record');
-              }
+			fetchWorkoutSplits();
+		} catch (error) {
+			Alert.alert("Error!", "Something went wrong");
+		}
+	}
 
-              else { 
-                const { data: newWorkoutSplitsData, error: newWorkoutSplitsError } = await supabase
-                .from('workout_splits')
-                .upsert(workoutSplitInserts, { onConflict: 'category_id, workout_id' })
-                .select('*');
-    
-    
-              console.log('NEW WORKOUT SPLITS', newWorkoutSplitsData);
-    
-              if (newWorkoutSplitsData) {
-                Alert.alert('Success!', 'Saved')
-    
-                setOpenModal(prev => ({ ...prev, [workoutId]: false }));
-                setStoreWorkoutSplit([]);
+	async function handleWorkoutSplit({ workoutId }: { workoutId: number }) {
+		try {
+			const user = await supabase.auth.getUser();
 
-              }
-    
-              if (newWorkoutSplitsError) {
-                Alert.alert('Error!', newWorkoutSplitsError.message);
-              }
-        }
+			console.log("workoutId", workoutId);
 
-                        
-         fetchWorkoutSplits();
-     } catch (error) {
-      Alert.alert('Error!', 'Something went wrong');
-     }
+			console.log("new work out splits", storeWorkoutSplit);
+			let workoutDay: number | undefined;
+
+			//first, check if the workout day exists
+			const { data: checkExistingWorkoutDay, error: workoutDayError } =
+				await supabase
+					.from("workout_days")
+					.select("*")
+					.eq("day", workoutId)
+					.eq("user_id", user.data.user?.id as string)
+					.single();
+
+			if (checkExistingWorkoutDay) {
+				workoutDay = checkExistingWorkoutDay.id;
+			} else {
+				// second, get or create the workout day
+				const { data: newWorkoutDay } = await supabase
+					.from("workout_days")
+					.upsert(
+						{
+							day: workoutId,
+							user_id: user.data.user?.id as string,
+						},
+						{ onConflict: "day, user_id" },
+					)
+					.eq("user_id", user.data.user?.id as string)
+					.eq("day", workoutId)
+					.select("*")
+					.single();
+
+				if (newWorkoutDay) workoutDay = newWorkoutDay.id;
+			}
+
+			if (workoutDay) {
+				handleWorkoutDay({ workoutDayId: workoutDay, workoutId: workoutId });
+			} else {
+				Alert.alert("Error!", "Something went wrong");
+			}
+		} catch (error) {
+			Alert.alert("Error!", "Something went wrong");
+		}
+	}
+
+	console.log("STORE WORKOUT SPLIT", storeWorkoutSplit);
+
+	// callbacks
+	const handlePresentModalPress = useCallback(() => {
+		bottomSheetRef.current?.snapToIndex(2);
+	}, []);
+
+	return (
+		<SafeAreaView
+			edges={["bottom"]}
+			style={{
+				flex: 1,
+				alignItems: "flex-start",
+				justifyContent: "flex-start",
+				alignContent: "flex-start",
+				backgroundColor: Colors[colorScheme].background,
+			}}
+		>
+			<ScrollView
+				style={[containerStyles.container, { gap: 12, paddingTop: 12 }]}
+			>
+				<Pressable
+					style={[
+						styles.profileBtn,
+						{ backgroundColor: Colors[colorScheme].frameBackground },
+					]}
+				>
+					{/* Profile */}
+					<Pressable onPress={() => router.push("/personal-info")}>
+						<View style={{ flexDirection: "row", gap: 8 }}>
+							<Image
+								contentFit="cover"
+								source={require("@/assets/images/user-default.png")}
+								style={{ width: 50, height: 50, borderRadius: 100 }}
+							/>
+
+							<View style={{ flexDirection: "column", gap: 4 }}>
+								<Text style={typography.heading}>My Name</Text>
+								<Text style={typography.description}>
+									Profile, Your Activity, and more
+								</Text>
+							</View>
+						</View>
+					</Pressable>
+
+					{/** Icon */}
+					<FontAwesome5
+						name="chevron-right"
+						size={15}
+						color={Colors[colorScheme].text}
+					/>
+				</Pressable>
+
+				{/** Settings */}
+				<View style={{ gap: 4, marginVertical: 24, alignItems: "center" }}>
+					<Text style={[typography.heading, { textAlign: "center" }]}>
+						Workout split
+					</Text>
+					<Text style={[typography.subheading, { textAlign: "center" }]}>
+						Freely set your split and so we can remind you to workout
+					</Text>
+				</View>
+
+				{/** Settings List */}
+				<FlatList
+					data={daysOfWeek}
+					scrollEnabled={false}
+					keyExtractor={(item) => item.id.toString()}
+					style={{
+						backgroundColor: Colors[colorScheme].frameBackground,
+						padding: 12,
+						borderRadius: 16,
+						marginVertical: 12,
+					}}
+					renderItem={({ item }) => (
+						<Pressable
+							onPress={() => {
+								// Initialize storeWorkoutSplit with existing data when opening modal
+								const existingSplits =
+									workoutSplits?.filter(
+										(split) => split.workout_days?.day === item.id,
+									) || [];
+								const initialChecked = existingSplits.map((split) => ({
+									id: split.workout_categories?.id!,
+									checked: true,
+								}));
+								setStoreWorkoutSplit(initialChecked);
+								setOpenModal((prev) => ({
+									...prev,
+									[item.id]: !prev[item.id],
+								}));
+							}}
+						>
+							<View
+								style={{
+									flexDirection: "column",
+									alignItems: "center",
+									justifyContent: "space-between",
+									gap: 6,
+									width: "100%",
+									marginBottom: 12,
+								}}
+							>
+								<View
+									style={{
+										flexDirection: "row",
+										alignItems: "center",
+										justifyContent: "space-between",
+										width: "100%",
+									}}
+								>
+									<Text>{item.name}</Text>
+
+									<Text style={{ color: Colors[colorScheme].text["200"] }}>
+										{(() => {
+											const splits = workoutSplits?.filter(
+												(split) => split.workout_days?.day === item.id,
+											);
+
+											if (splits && splits.length > 0) {
+												if (splits.length > 4) {
+													const slicedSplits = splits.slice(0, 4);
+													return (
+														slicedSplits
+															.map((split) => split.workout_categories?.name)
+															.filter(Boolean)
+															.join(", ")
+															.trim() + "..."
+													);
+												}
+												return splits
+													.map((split) => split.workout_categories?.name)
+													.filter(Boolean)
+													.join(", ")
+													.trim();
+											}
+											return "None";
+										})()}
+									</Text>
+								</View>
+								{/**Horizontal line */}
+								<View
+									style={{
+										height: 1,
+										backgroundColor: Colors[colorScheme].text["200"],
+										width: "100%",
+									}}
+								/>
+							</View>
+
+							<Modal
+								animationType="fade"
+								transparent
+								visible={openModal[item.id] || false}
+								onRequestClose={() =>
+									setOpenModal((prev) => ({ ...prev, [item.id]: false }))
+								}
+							>
+								<Pressable
+									style={styles.modalBackdrop}
+									onPress={() =>
+										setOpenModal((prev) => ({ ...prev, [item.id]: false }))
+									}
+								>
+									<Pressable
+										style={[
+											styles.modalContent,
+											{ backgroundColor: Colors[colorScheme].background },
+										]}
+										onPress={() => {}}
+									>
+										<View style={styles.modalHeader}>
+											<View style={{ flexDirection: "column", gap: 6 }}>
+												<Text style={[typography.heading]}>Workout Split</Text>
+												<Text style={[typography.description]}>
+													Configure your workout split on {item.name}
+												</Text>
+											</View>
+
+											<Pressable
+												onPress={() => {
+													setStoreWorkoutSplit([]); // Clear state when closing modal
+													setOpenModal((prev) => ({
+														...prev,
+														[item.id]: false,
+													}));
+												}}
+											>
+												<FontAwesome5
+													name="times"
+													size={20}
+													color={Colors[colorScheme].text}
+												/>
+											</Pressable>
+										</View>
+
+										<FlatList
+											contentContainerStyle={{ gap: 12 }}
+											style={{ flexGrow: 0 }}
+											scrollEnabled={false}
+											keyExtractor={(workoutCategory) =>
+												workoutCategory.id.toString()
+											}
+											data={categories}
+											renderItem={({ item: category, index }) => (
+												<View
+													style={{
+														flexDirection: "row",
+														alignItems: "center",
+														gap: 6,
+													}}
+												>
+													<Checkbox
+														value={
+															storeWorkoutSplit.some(
+																(split) => split.id === category.id,
+															) || false
+														}
+														onValueChange={(checked) => {
+															console.log(
+																"category",
+																category,
+																"checked:",
+																checked,
+															);
+															console.log("workoutday", item.id);
+
+															setStoreWorkoutSplit((prev) => {
+																const exists = prev.some(
+																	(split) => split.id === category.id,
+																);
+
+																if (checked && !exists) {
+																	// Add to state if checked and not already present
+																	return [
+																		...prev,
+																		{ id: category.id, checked: true },
+																	];
+																}
+																if (!checked && exists) {
+																	// Remove from state if unchecked and present
+																	return prev.filter(
+																		(split) => split.id !== category.id,
+																	);
+																}
+																return prev; // No change needed
+															});
+														}}
+														hitSlop={12}
+														color={
+															storeWorkoutSplit.some(
+																(split) => split.id === category.id,
+															)
+																? Colors[colorScheme].green[600]
+																: undefined
+														}
+													/>
+													<Text
+														style={{
+															fontFamily: "Inter_400Regular",
+															fontSize: 12,
+														}}
+													>
+														{category.name}
+													</Text>
+												</View>
+											)}
+										/>
+										{/**Buttons */}
+										<View style={styles.buttonWrapper}>
+											<Pressable
+												style={[
+													styles.button,
+													{
+														backgroundColor: "transparent",
+														borderWidth: 1,
+														borderColor: Colors[colorScheme].pink["600"],
+													},
+												]}
+												onPress={() => {
+													setStoreWorkoutSplit([]); // Clear state when canceling
+													setOpenModal((prev) => ({
+														...prev,
+														[item.id]: false,
+													}));
+												}}
+											>
+												<Text
+													style={[
+														typography.description,
+														{ color: Colors[colorScheme].pink["600"] },
+													]}
+												>
+													Cancel
+												</Text>
+											</Pressable>
+
+											<Pressable
+												style={[
+													styles.button,
+													{ backgroundColor: Colors[colorScheme].green[600] },
+												]}
+												onPress={() =>
+													handleWorkoutSplit({ workoutId: item.id })
+												}
+											>
+												<Text
+													style={[
+														typography.description,
+														{ color: Colors[colorScheme].background },
+													]}
+												>
+													Save
+												</Text>
+											</Pressable>
+										</View>
+									</Pressable>
+								</Pressable>
+							</Modal>
+						</Pressable>
+					)}
+				/>
+
+				{/**Other settings */}
+				<View style={{ alignItems: "flex-start" }}>
+					<Text style={[typography.heading, { textAlign: "left" }]}>
+						Others
+					</Text>
+				</View>
+
+				<FlatList
+					data={["Health Details", "Change Step Goal", "Unit Measure"]}
+					scrollEnabled={false}
+					style={{
+						backgroundColor: Colors[colorScheme].frameBackground,
+						padding: 12,
+						borderRadius: 16,
+						marginVertical: 12,
+					}}
+					renderItem={({ item }) => {
+						return (
+							<View
+								style={{
+									flexDirection: "column",
+									alignItems: "center",
+									justifyContent: "space-between",
+									gap: 12,
+									width: "100%",
+									marginBottom: 12,
+								}}
+							>
+								{item === "Health Details" ? (
+									<Pressable
+										style={{ flexDirection: "column", gap: 6, width: "100%" }}
+										onPress={() => router.push("/settings/health-details")}
+									>
+										<View
+											style={{
+												flexDirection: "row",
+												alignItems: "center",
+												justifyContent: "space-between",
+												width: "100%",
+											}}
+										>
+											<Text>{item}</Text>
+										</View>
+
+										{/**Horizontal line */}
+										<View
+											style={{
+												height: 1,
+												backgroundColor: Colors[colorScheme].text["200"],
+												width: "100%",
+											}}
+										/>
+									</Pressable>
+								) : (
+									<Pressable
+										style={{ flexDirection: "column", gap: 6, width: "100%" }}
+										onPress={() => {
+											setActiveSheet(item as any);
+											handlePresentModalPress();
+										}}
+									>
+										<View
+											style={{
+												flexDirection: "row",
+												alignItems: "center",
+												justifyContent: "space-between",
+												width: "100%",
+											}}
+										>
+											<Text>{item}</Text>
+										</View>
+
+										{/**Horizontal line */}
+										<View
+											style={{
+												height: 1,
+												backgroundColor: Colors[colorScheme].text["200"],
+												width: "100%",
+											}}
+										/>
+									</Pressable>
+								)}
+							</View>
+						);
+					}}
+				/>
+
+				<BottomSheet
+					ref={bottomSheetRef}
+					snapPoints={snapPoints}
+					index={-1}
+					enableDynamicSizing={false}
+					enablePanDownToClose
+				>
+					{activeSheet === "Unit Measure" ? (
+						<BottomSheetScrollView
+							scrollEnabled={true}
+							showsVerticalScrollIndicator={false}
+						>
+							<UnitMeasure />
+						</BottomSheetScrollView>
+					) : (
+						<BottomSheetView style={{ flex: 1 }}>
+							{activeSheet === "Change Step Goal" ? (
+								<ChangeStepGoal />
+							) : (
+								<Text>Change Step Goal</Text>
+							)}
+						</BottomSheetView>
+					)}
+				</BottomSheet>
+			</ScrollView>
+		</SafeAreaView>
+	);
 }
-
-
-
-  async function handleWorkoutSplit({ workoutId }: { workoutId: number }) {
-    try {
-      const user = await supabase.auth.getUser();
-
-      console.log('workoutId', workoutId);
-
-      console.log('new work out splits', storeWorkoutSplit);
-      let workoutDay;
-
-      //first, check if the workout day exists
-      const { data: checkExistingWorkoutDay, error: workoutDayError } = await supabase
-            .from('workout_days')
-            .select('*')
-            .eq('day', workoutId)
-            .eq('user_id', user.data.user?.id as string)
-            .single();
-
-     if (checkExistingWorkoutDay)  { 
-        workoutDay = checkExistingWorkoutDay.id;
-     }
-
-     else { 
-        // second, get or create the workout day
-      const { data: newWorkoutDay } = await supabase
-      .from('workout_days')
-      .upsert({
-        day: workoutId,
-        user_id: user.data.user?.id as string
-      }, { onConflict: 'day, user_id' }).eq('user_id', user.data.user?.id as string).eq('day', workoutId).select('*').single();
-
-       if (newWorkoutDay) workoutDay = newWorkoutDay.id;
-     }
-
-      if (workoutDay) {
-          handleWorkoutDay({ workoutDayId: workoutDay, workoutId: workoutId });
-      }
-      else { 
-        Alert.alert('Error!', 'Something went wrong');
-      }
-    } catch (error) {
-      Alert.alert('Error!', 'Something went wrong');
-    }
-  }
-
-console.log('STORE WORKOUT SPLIT', storeWorkoutSplit);
-
-  // callbacks
-  const handlePresentModalPress = useCallback(() => {
-    bottomSheetRef.current?.snapToIndex(2);
-  }, []);
-
-  
-  return (
-    <SafeAreaView edges={['bottom']} style={{ flex: 1, alignItems: 'flex-start', justifyContent: 'flex-start', alignContent: 'flex-start', backgroundColor: Colors[colorScheme].background }}>
-        <ScrollView style={[containerStyles.container, { gap: 12, paddingTop: 12 }]}>
-            <Pressable style={[styles.profileBtn, { backgroundColor: Colors[colorScheme].frameBackground }]}>
-              {/* Profile */}
-             <Pressable onPress={() => router.push('/profile')}>
-             <View style={{ flexDirection: 'row', gap: 8 }}>
-                <Image contentFit='cover' source={require('@/assets/images/user-default.png')} style={{ width: 50, height: 50, borderRadius: 100 }} />
-
-                <View style={{ flexDirection: 'column', gap: 4 }}>
-                  <Text style={typography.heading}>My Name</Text>
-                  <Text style={typography.description}>Profile, Your Activity, and more</Text>
-                </View>
-              </View>
-             </Pressable>
-
-              {/** Icon */}
-              <FontAwesome5 name="chevron-right" size={15} color={Colors[colorScheme].text} />
-            </Pressable>
-
-            {/** Settings */}
-            <View style={{ gap: 4, marginVertical: 24, alignItems: 'center' }}>
-              <Text style={[typography.heading, { textAlign: 'center' }]}>
-                Workout split
-              </Text>
-              <Text style={[typography.subheading, { textAlign: 'center' }]}>Freely set your split and so we can remind you to workout</Text>
-            </View>
-
-
-
-            {/** Settings List */}
-            <FlatList
-              data={daysOfWeek}
-              scrollEnabled={false}
-              keyExtractor={(item) => item.id.toString()}
-              style={{
-                backgroundColor: Colors[colorScheme].frameBackground,
-                padding: 12,
-                borderRadius: 16,
-                marginVertical: 12,
-              }}
-              renderItem={({ item }) => (
-                <Pressable 
-                 onPress={() => {
-                  // Initialize storeWorkoutSplit with existing data when opening modal
-                  const existingSplits = workoutSplits?.filter(split => split.workout_days?.day === item.id) || [];
-                  const initialChecked = existingSplits.map(split => ({
-                    id: split.workout_categories?.id!,
-                    checked: true
-                  }));
-                  setStoreWorkoutSplit(initialChecked);
-                  setOpenModal(prev => ({ ...prev, [item.id]: !prev[item.id] }));
-                }}>
-
-
-                  <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 6, width: '100%', marginBottom: 12 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                      <Text>{item.name}</Text>
-
-                      <Text style={{ color: Colors[colorScheme].text['200'] }}>
-                        {(() => {
-                          const splits = workoutSplits?.filter(split => split.workout_days?.day === item.id);
-
-                          if (splits && splits.length > 0) {
-                            if (splits.length > 4) {
-                              let slicedSplits = splits.slice(0, 4);
-                              return slicedSplits.map(split => split.workout_categories?.name).filter(Boolean).join(', ').trim() + '...';
-                            }
-                            else {
-                              return splits.map(split => split.workout_categories?.name).filter(Boolean).join(', ').trim();
-                            }
-                          }
-                          return 'None';
-                        })()}
-                      </Text>
-
-                    </View>
-                    {/**Horizontal line */}
-                    <View style={{ height: 1, backgroundColor: Colors[colorScheme].text['200'], width: '100%' }} />
-                  </View>
-
-                  <Modal
-                    animationType='fade'
-                    transparent
-                    visible={openModal[item.id] || false}
-                    onRequestClose={() => setOpenModal(prev => ({ ...prev, [item.id]: false }))}
-                  >
-                    <Pressable
-                      style={styles.modalBackdrop}
-                      onPress={() => setOpenModal(prev => ({ ...prev, [item.id]: false }))}
-                    >
-                      <Pressable style={[styles.modalContent, { backgroundColor: Colors[colorScheme].background }]} onPress={() => { }}>
-                        <View style={styles.modalHeader}>
-                          <View style={{ flexDirection: 'column', gap: 6 }}>
-                            <Text style={[typography.heading,]}>Workout Split</Text>
-                            <Text style={[typography.description]}>
-                              Configure your workout split on {item.name}
-                            </Text>
-                          </View>
-
-                          <Pressable onPress={() => {
-                            setStoreWorkoutSplit([]); // Clear state when closing modal
-                            setOpenModal(prev => ({ ...prev, [item.id]: false }));
-                          }}>
-                            <FontAwesome5 name="times" size={20} color={Colors[colorScheme].text} />
-                          </Pressable>
-                        </View>
-
-                        <FlatList
-                          contentContainerStyle={{ gap: 12 }}
-                          style={{ flexGrow: 0 }}
-                          scrollEnabled={false}
-                          keyExtractor={(workoutCategory) => workoutCategory.id.toString()}
-                          data={categories}
-                          renderItem={({ item: category, index }) => (
-
-
-                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                              <Checkbox
-                                value={storeWorkoutSplit.some(split => split.id === category.id) || false}
-                                onValueChange={(checked) => {
-                                  console.log('category', category, 'checked:', checked);
-                                  console.log('workoutday', item.id);
-
-                                  setStoreWorkoutSplit(prev => {
-                                    const exists = prev.some(split => split.id === category.id);
-
-                                    if (checked && !exists) {
-                                      // Add to state if checked and not already present
-                                      return [...prev, { id: category.id, checked: true }];
-                                    } else if (!checked && exists) {
-                                      // Remove from state if unchecked and present
-                                      return prev.filter(split => split.id !== category.id);
-                                    }
-                                    return prev; // No change needed
-                                  });
-                                }}
-                                hitSlop={12}
-                                color={storeWorkoutSplit.some(split => split.id === category.id) ? Colors[colorScheme].green[600] : undefined}
-                              />
-                              <Text style={{ fontFamily: 'Inter_400Regular', fontSize: 12 }}>
-                                {
-                                  category.name
-                                }
-                              </Text>
-                            </View>
-                          )}
-                        />
-                        {/**Buttons */}
-                        <View style={styles.buttonWrapper}>
-                          <Pressable
-                            style={[styles.button, { backgroundColor: 'transparent', borderWidth: 1, borderColor: Colors[colorScheme].pink['600'] }]}
-                            onPress={() => {
-                              setStoreWorkoutSplit([]); // Clear state when canceling
-                              setOpenModal(prev => ({ ...prev, [item.id]: false }));
-                            }}
-                          >
-                            <Text style={[typography.description, { color: Colors[colorScheme].pink['600'] }]}>Cancel</Text>
-                          </Pressable>
-
-                          <Pressable
-                            style={[styles.button, { backgroundColor: Colors[colorScheme].green[600] }]}
-                            onPress={() => handleWorkoutSplit({ workoutId: item.id })}
-                          >
-                            <Text style={[typography.description, { color: Colors[colorScheme].background }]}>Save</Text>
-                          </Pressable>
-                        </View>
-
-                      </Pressable>
-                    </Pressable>
-                  </Modal>
-                </Pressable>
-              )}
-            />
-
-            {/**Other settings */}
-            <View style={{ alignItems: 'flex-start' }}>
-              <Text style={[typography.heading, { textAlign: 'left' }]}>
-                Others
-              </Text>
-            </View>
-
-             <FlatList
-              data={['Health Details', 'Change Step Goal', 'Unit Measure']}
-              scrollEnabled={false}
-              style={{
-                backgroundColor: Colors[colorScheme].frameBackground,
-                padding: 12,
-                borderRadius: 16,
-                marginVertical: 12,
-              }}
-              renderItem={({ item }) => {
-                return (
-                  <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', gap: 12, width: '100%', marginBottom: 12 }}>
-                   {item === 'Health Details' ?(
-                      <Pressable style={{ flexDirection: 'column', gap: 6, width: '100%' }} onPress={() => router.push('/settings/health-details')}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                          <Text>{item}</Text>
-                        </View>
-
-                        {/**Horizontal line */}
-                        <View style={{ height: 1, backgroundColor: Colors[colorScheme].text['200'], width: '100%' }} />
-                      </Pressable>
-                    ) :
-                      <Pressable style={{ flexDirection: 'column', gap: 6, width: '100%' }} onPress={() => { setActiveSheet(item as any); handlePresentModalPress(); }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-                          <Text>{item}</Text>
-                        </View>
-
-                        {/**Horizontal line */}
-                        <View style={{ height: 1, backgroundColor: Colors[colorScheme].text['200'], width: '100%' }} />
-
-                      </Pressable>
-
-                    }                     
-
-                  </View>
-                )
-              }
-              }
-            />
-   
-              <BottomSheet ref={bottomSheetRef} snapPoints={snapPoints} index={-1} enableDynamicSizing={false} enablePanDownToClose>
-                {activeSheet === 'Unit Measure' ? (
-                  <BottomSheetScrollView  scrollEnabled={true} showsVerticalScrollIndicator={false}>
-                       <UnitMeasure />
-                  </BottomSheetScrollView>
-                ) : (
-                   <BottomSheetView style={{ flex: 1 }}>
-                     {activeSheet === 'Change Step Goal' ? (
-                       <ChangeStepGoal />
-                     ) : (
-                       <Text>Change Step Goal</Text>
-                     )}
-                   </BottomSheetView>
-                )}
-             </BottomSheet>
-         
-        </ScrollView>
-      </SafeAreaView>
-
-  )
-}
-
 
 const styles = StyleSheet.create({
-  buttonWrapper: {
-    flexDirection: 'row',
-    gap: 12,
-    marginHorizontal: 'auto',
-    marginTop: 16,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  profileBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderRadius: 16,
-    paddingHorizontal: 8,
-  },
-  button: {
-    padding: 12,
-    borderRadius: 16,
-    width: 100,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    borderRadius: 16,
-    padding: 24,
-    margin: 20,
-    minWidth: 300,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
+	buttonWrapper: {
+		flexDirection: "row",
+		gap: 12,
+		marginHorizontal: "auto",
+		marginTop: 16,
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	profileBtn: {
+		flexDirection: "row",
+		alignItems: "center",
+		justifyContent: "space-between",
+		paddingVertical: 12,
+		borderRadius: 16,
+		paddingHorizontal: 8,
+	},
+	button: {
+		padding: 12,
+		borderRadius: 16,
+		width: 100,
+		alignItems: "center",
+		justifyContent: "center",
+		flexDirection: "row",
+	},
+	modalBackdrop: {
+		flex: 1,
+		backgroundColor: "rgba(0, 0, 0, 0.2)",
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	modalContent: {
+		borderRadius: 16,
+		padding: 24,
+		margin: 20,
+		minWidth: 300,
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.25,
+		shadowRadius: 3.84,
+		elevation: 5,
+	},
+	modalHeader: {
+		flexDirection: "row",
+		justifyContent: "space-between",
+		alignItems: "center",
+		marginBottom: 12,
+	},
 });

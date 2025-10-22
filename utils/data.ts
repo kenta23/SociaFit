@@ -190,32 +190,43 @@ export const getUserDetails = async (userid?: string) => {
 
 
 
-   const { data: activities, error: activitiesError } = await supabase.from('activities').select('*', { count: 'exact', head: true }).eq('user_id', user as string);
+   const { data: activities, error: activitiesError } = await supabase.from('activities').select('*', { count: 'exact' }).eq('user_id', user as string);
 
    const { data: userData, error: userDataError } = await supabase.from('userdata').select('*').eq('user_id', user as string).single();
    
    const { data: authUser, error: authUserError } = await getAuthUser();
   
 
-    
-   console.log('name from userdetails', userData?.full_name);
+   console.log('activities error', activitiesError);
+   console.log('userData error', userDataError);
+   console.log('authUser error', authUserError);
+   console.log('followers error', followersError);
 
-   if (activities) { 
-     const countActivityLikes = await Promise.all(activities.map(async (activity) => { 
-        const { data: totalActivityLikes, error: totalActivityLikesError } = await supabase.from('likes').select('*', { count: 'exact', head: true }).eq('activity', activity.id as number);
+
+
+
+
+
+     const countActivityLikes = await Promise.all((activities ?? []).map(async (activity) => { 
+        const { count: totalActivityLikes, error: totalActivityLikesError } = await supabase
+          .from('likes')
+          .select('*', { count: 'exact', head: true })
+          .eq('activity', activity.id as number);
 
         if(totalActivityLikesError) { 
           console.log('totalActivityLikesError', totalActivityLikesError);
+          return 0;
         }
 
+        console.log('totalActivityLikes', totalActivityLikes);
+        
         return totalActivityLikes;
       })
     )
 
+    console.log('countActivityLikes', countActivityLikes);
+
     return { followers, totalLikes: countActivityLikes, countActivities: activities, name: userData?.full_name, email: authUser.user?.email };
-   }
 
-
-   return;
    
 }

@@ -1,14 +1,14 @@
-import { decode } from 'base64-arraybuffer';
-import * as FileSystem from 'expo-file-system/legacy';
-import { supabase } from './supabase';
-
-
+import { decode } from "base64-arraybuffer";
+import * as FileSystem from "expo-file-system/legacy";
+import { getAuthUser } from "./auth";
+import { getUserAvatar } from "./data";
+import { supabase } from "./supabase";
 
 export interface ImageUploadResult {
-  success: boolean;
-  publicUrl?: string;
-  error?: string;
-  path?: string;
+	success: boolean;
+	publicUrl?: string;
+	error?: string;
+	path?: string;
 }
 
 /**
@@ -20,116 +20,118 @@ export interface ImageUploadResult {
  * @returns Promise<ImageUploadResult>
  */
 
-
 export const uploadImageToSupabase = async (
-  imageUri: string,
-  fileName: string,
-  bucketName: string,
-  folder?: string
+	imageUri: string,
+	fileName: string,
+	bucketName: string,
+	folder?: string,
 ): Promise<ImageUploadResult> => {
-  try {
-    // Read the file from the URI
-    // const response = await fetch(imageUri, {
-    //   headers: {
-    //     'Content-Type': 'image/jpeg'
-    //   }
-    // });
-    // if (!response.ok) {
-    //   throw new Error(`Failed to fetch image: ${response.statusText}`);
-      // }
-      const base64 = await FileSystem.readAsStringAsync(imageUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-   
-    
-    const arrayBuffer = decode(base64);
-    
-    // Create a unique filename with timestamp
-    const timestamp = Date.now();
-    const fileExtension = fileName.split('.').pop()?.toLowerCase() || 'jpg';
-    const uniqueFileName = `${timestamp}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
-    
-    // Determine content type based on file extension
-    let contentType = 'image/jpeg';
-    switch (fileExtension) {
-      case 'png':
-        contentType = 'image/png';
-        break;
-      case 'gif':
-        contentType = 'image/gif';
-        break;
-      case 'webp':
-        contentType = 'image/webp';
-        break;
-      case 'heic':
-        contentType = 'image/jpeg'; // Convert HEIC to JPEG
-        break;
-      default:
-        contentType = 'image/jpeg';
-    }
-    
-    // Create the full path - for RLS policy, the first folder should be the user ID
-    const fullPath = folder ? `${folder}/${uniqueFileName}` : uniqueFileName;
-    
-    // Check if bucket exists, create if it doesn't
-    const { data: bucketData, error: bucketError } = await supabase.storage.getBucket(bucketName);
-    
-    if (bucketError && bucketError.message.includes('not found')) {
-      console.log('Creating bucket:', bucketName);
-      const { error: createError } = await supabase.storage.createBucket(bucketName, {
-        public: true,
-        allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-        fileSizeLimit: 52428800 // 50MB
-      });
-      
-      if (createError) {
-        console.error('Error creating bucket:', createError);
-        return {
-          success: false,
-          error: `Failed to create bucket: ${createError.message}`
-        };
-      }
-    }
-    
-    // Upload to Supabase storage using the correct bucket
-    const { data, error } = await supabase.storage
-      .from(bucketName)
-      .upload(fullPath, arrayBuffer, {
-        contentType,
-        upsert: false
-      });
-    
-    if (error) {
-      console.error('Upload error:', error);
-      return {
-        success: false,
-        error: error.message
-      };
-    }
+	try {
+		// Read the file from the URI
+		// const response = await fetch(imageUri, {
+		//   headers: {
+		//     'Content-Type': 'image/jpeg'
+		//   }
+		// });
+		// if (!response.ok) {
+		//   throw new Error(`Failed to fetch image: ${response.statusText}`);
+		// }
+		const base64 = await FileSystem.readAsStringAsync(imageUri, {
+			encoding: FileSystem.EncodingType.Base64,
+		});
 
-    // Get the public URL for the uploaded image
-    const { data: publicUrlData } = supabase.storage
-      .from(bucketName)
-      .getPublicUrl(data.path);
+		const arrayBuffer = decode(base64);
 
-    return {
-      success: true,
-      publicUrl: publicUrlData.publicUrl,
-      path: data.path
-    };
+		// Create a unique filename with timestamp
+		const timestamp = Date.now();
+		const fileExtension = fileName.split(".").pop()?.toLowerCase() || "jpg";
+		const uniqueFileName = `${timestamp}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
 
-  } catch (error) {
-    console.error('Error uploading image:', error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error occurred'
-    };
-  }
+		// Determine content type based on file extension
+		let contentType = "image/jpeg";
+		switch (fileExtension) {
+			case "png":
+				contentType = "image/png";
+				break;
+			case "gif":
+				contentType = "image/gif";
+				break;
+			case "webp":
+				contentType = "image/webp";
+				break;
+			case "heic":
+				contentType = "image/jpeg"; // Convert HEIC to JPEG
+				break;
+			default:
+				contentType = "image/jpeg";
+		}
+
+		// Create the full path - for RLS policy, the first folder should be the post ID
+		const fullPath = folder ? `${folder}/${uniqueFileName}` : uniqueFileName;
+
+		// Check if bucket exists, create if it doesn't
+		const { data: bucketData, error: bucketError } =
+			await supabase.storage.getBucket(bucketName);
+
+		if (bucketError && bucketError.message.includes("not found")) {
+			console.log("Creating bucket:", bucketName);
+			const { error: createError } = await supabase.storage.createBucket(
+				bucketName,
+				{
+					public: true,
+					allowedMimeTypes: [
+						"image/jpeg",
+						"image/png",
+						"image/gif",
+						"image/webp",
+					],
+					fileSizeLimit: 52428800, // 50MB
+				},
+			);
+
+			if (createError) {
+				console.error("Error creating bucket:", createError);
+				return {
+					success: false,
+					error: `Failed to create bucket: ${createError.message}`,
+				};
+			}
+		}
+
+		// Upload to Supabase storage using the correct bucket
+		const { data, error } = await supabase.storage
+			.from(bucketName)
+			.upload(fullPath, arrayBuffer, {
+				contentType,
+				upsert: false,
+			});
+
+		if (error) {
+			console.error("Upload error:", error);
+			return {
+				success: false,
+				error: error.message,
+			};
+		}
+
+		// Get the public URL for the uploaded image
+		const { data: publicUrlData } = supabase.storage
+			.from(bucketName)
+			.getPublicUrl(data.path);
+
+		return {
+			success: true,
+			publicUrl: publicUrlData.publicUrl,
+			path: data.path,
+		};
+	} catch (error) {
+		console.error("Error uploading image:", error);
+		return {
+			success: false,
+			error: error instanceof Error ? error.message : "Unknown error occurred",
+		};
+	}
 };
-
-
-
-
 
 /**
  * Uploads multiple images to Supabase storage
@@ -139,29 +141,28 @@ export const uploadImageToSupabase = async (
  * @returns Promise<ImageUploadResult[]>
  */
 
-
 export const uploadMultipleImages = async (
-  images: any[],
-  bucketName: string,
-  folder?: string
+	images: any[],
+	bucketName: string,
+	folder?: string,
 ): Promise<ImageUploadResult[]> => {
-  const uploadPromises = images.map(async (imageResult) => {
-    if (imageResult.assets && imageResult.assets[0]) {
-      const asset = imageResult.assets[0];
-      return await uploadImageToSupabase(
-        asset.uri,
-        asset.fileName || 'image.jpg',
-        bucketName,
-        folder
-      );
-    }
-    return {
-      success: false,
-      error: 'No asset found in image result'
-    };
-  });
+	const uploadPromises = images.map(async (imageResult) => {
+		if (imageResult.assets && imageResult.assets[0]) {
+			const asset = imageResult.assets[0];
+			return await uploadImageToSupabase(
+				asset.uri,
+				asset.fileName || "image.jpg",
+				bucketName,
+				folder,
+			);
+		}
+		return {
+			success: false,
+			error: "No asset found in image result",
+		};
+	});
 
-  return await Promise.all(uploadPromises);
+	return await Promise.all(uploadPromises);
 };
 
 /**
@@ -171,22 +172,72 @@ export const uploadMultipleImages = async (
  * @returns Promise<boolean>
  */
 export const deleteImageFromSupabase = async (
-  path: string,
-  bucketName: string
+	path: string,
+	bucketName: string,
 ): Promise<boolean> => {
-  try {
-    const { error } = await supabase.storage
-      .from(bucketName)
-      .remove([path]);
+	try {
+		const { error } = await supabase.storage.from(bucketName).remove([path]);
 
-    if (error) {
-      console.error('Delete error:', error);
-      return false;
-    }
+		if (error) {
+			console.error("Delete error:", error);
+			return false;
+		}
 
-    return true;
-  } catch (error) {
-    console.error('Error deleting image:', error);
-    return false;
-  }
+		return true;
+	} catch (error) {
+		console.error("Error deleting image:", error);
+		return false;
+	}
+};
+
+export const uploadAvatar = async (imageUri: string) => {
+	const user = await getAuthUser();
+	const fileName = imageUri.split("/").pop(); //last part of the path
+
+	const base64 = await FileSystem.readAsStringAsync(imageUri, {
+		encoding: FileSystem.EncodingType.Base64,
+	});
+
+	const arrayBuffer = decode(base64);
+	const folderPath = `${user.data.user?.id}/${fileName}`;
+
+	console.log("folderPath", folderPath);
+
+	const { data: existingAvatar, error: existingAvatarError } =
+		await supabase.storage.from("avatar").list(user.data.user?.id as string);
+
+	if (existingAvatarError) {
+		console.error("Error checking existing avatar:", existingAvatarError);
+		return;
+	}
+
+	console.log("existingAvatar", existingAvatar);
+
+	if (existingAvatar && existingAvatar.length > 0) {
+		const deletedResult = await Promise.all(
+			existingAvatar.map(async (avatar) => {
+				const deleted = await deleteImageFromSupabase(
+					`${user.data.user?.id}/${avatar.name}`,
+					"avatar",
+				);
+				return deleted;
+			}),
+		);
+		console.log("deletedResult", deletedResult);
+	}
+
+	const { data, error } = await supabase.storage
+		.from("avatar")
+		.upload(folderPath, arrayBuffer, {
+			contentType: "image/jpeg",
+			upsert: true,
+		});
+
+	if (data?.id) {
+		const newAvatar = await getUserAvatar();
+		return newAvatar;
+	}
+
+	console.error("Error uploading avatar:", error);
+	return error;
 };
