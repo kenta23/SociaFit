@@ -1,34 +1,34 @@
 import { Colors } from "@/constants/Colors";
 import { typography } from "@/constants/typography";
 import { useBottomSheet } from "@/library/bottomsheetprovider";
-import { useStoreWorkoutSplits } from "@/utils/states";
+import { useStoreData, useStoreWorkoutSplits } from "@/utils/states";
 import { containerStyles } from "@/utils/styles";
 import { supabase } from "@/utils/supabase";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import BottomSheet, {
-  BottomSheetScrollView,
-  BottomSheetView,
+	BottomSheetScrollView,
+	BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import Checkbox from "expo-checkbox";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
 } from "react";
 import {
-  Alert,
-  FlatList,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
+	Alert,
+	FlatList,
+	Modal,
+	Pressable,
+	ScrollView,
+	StyleSheet,
+	Text,
+	useColorScheme,
+	View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ChangeStepGoal from "../settings/change-step-goal";
@@ -37,6 +37,7 @@ import UnitMeasure from "../settings/unit-measure";
 export default function settings() {
 	const colorScheme = useColorScheme() ?? "light";
 	const [openModal, setOpenModal] = useState<{ [key: number]: boolean }>({});
+	const { data } = useStoreData();
 	const [daysOfWeek] = useState([
 		{
 			id: 1,
@@ -83,7 +84,7 @@ export default function settings() {
 
 	const snapPoints = useMemo(() => ["50%", "75%", "100%"], []);
 
-	console.log("workoutSplitsState", workoutSplits);
+	// console.log("workoutSplitsState", workoutSplits);
 
 	const fetchWorkoutSplits = async () => {
 		const user = await supabase.auth.getUser();
@@ -111,10 +112,10 @@ export default function settings() {
 		console.log("ERROR", workoutSplitsError);
 	};
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		fetchWorkoutSplits();
-		// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	}, [fetchWorkoutSplits]);
+	}, []);
 
 	async function handleWorkoutDay({
 		workoutDayId,
@@ -258,7 +259,7 @@ export default function settings() {
 		}
 	}
 
-	console.log("STORE WORKOUT SPLIT", storeWorkoutSplit);
+	// console.log("STORE WORKOUT SPLIT", storeWorkoutSplit);
 
 	// callbacks
 	const handlePresentModalPress = useCallback(() => {
@@ -295,8 +296,20 @@ export default function settings() {
 							/>
 
 							<View style={{ flexDirection: "column", gap: 4 }}>
-								<Text style={typography.heading}>My Name</Text>
-								<Text style={typography.description}>
+								<Text
+									style={[
+										typography.heading,
+										{ color: Colors[colorScheme].text["0"] },
+									]}
+								>
+									{data?.full_name || "Unknown"}
+								</Text>
+								<Text
+									style={[
+										typography.description,
+										{ color: Colors[colorScheme].text["200"] },
+									]}
+								>
 									Profile, Your Activity, and more
 								</Text>
 							</View>
@@ -307,16 +320,26 @@ export default function settings() {
 					<FontAwesome5
 						name="chevron-right"
 						size={15}
-						color={Colors[colorScheme].text}
+						color={Colors[colorScheme].text["0"]}
 					/>
 				</Pressable>
 
 				{/** Settings */}
 				<View style={{ gap: 4, marginVertical: 24, alignItems: "center" }}>
-					<Text style={[typography.heading, { textAlign: "center" }]}>
+					<Text
+						style={[
+							typography.heading,
+							{ textAlign: "center", color: Colors[colorScheme].text["0"] },
+						]}
+					>
 						Workout split
 					</Text>
-					<Text style={[typography.subheading, { textAlign: "center" }]}>
+					<Text
+						style={[
+							typography.subheading,
+							{ textAlign: "center", color: Colors[colorScheme].text["200"] },
+						]}
+					>
 						Freely set your split and so we can remind you to workout
 					</Text>
 				</View>
@@ -369,7 +392,14 @@ export default function settings() {
 										width: "100%",
 									}}
 								>
-									<Text>{item.name}</Text>
+									<Text
+										style={[
+											typography.medium,
+											{ color: Colors[colorScheme].text["0"] },
+										]}
+									>
+										{item.name}
+									</Text>
 
 									<Text style={{ color: Colors[colorScheme].text["200"] }}>
 										{(() => {
@@ -380,13 +410,11 @@ export default function settings() {
 											if (splits && splits.length > 0) {
 												if (splits.length > 4) {
 													const slicedSplits = splits.slice(0, 4);
-													return (
-														slicedSplits
-															.map((split) => split.workout_categories?.name)
-															.filter(Boolean)
-															.join(", ")
-															.trim() + "..."
-													);
+													return `${slicedSplits
+														.map((split) => split.workout_categories?.name)
+														.filter(Boolean)
+														.join(", ")
+														.trim()}...`;
 												}
 												return splits
 													.map((split) => split.workout_categories?.name)
@@ -431,8 +459,20 @@ export default function settings() {
 									>
 										<View style={styles.modalHeader}>
 											<View style={{ flexDirection: "column", gap: 6 }}>
-												<Text style={[typography.heading]}>Workout Split</Text>
-												<Text style={[typography.description]}>
+												<Text
+													style={[
+														typography.heading,
+														{ color: Colors[colorScheme].text["0"] },
+													]}
+												>
+													Workout Split
+												</Text>
+												<Text
+													style={[
+														typography.description,
+														{ color: Colors[colorScheme].text["200"] },
+													]}
+												>
 													Configure your workout split on {item.name}
 												</Text>
 											</View>
@@ -449,7 +489,7 @@ export default function settings() {
 												<FontAwesome5
 													name="times"
 													size={20}
-													color={Colors[colorScheme].text}
+													color={Colors[colorScheme].text["0"]}
 												/>
 											</Pressable>
 										</View>
@@ -519,6 +559,7 @@ export default function settings() {
 														style={{
 															fontFamily: "Inter_400Regular",
 															fontSize: 12,
+															color: Colors[colorScheme].text["0"],
 														}}
 													>
 														{category.name}
@@ -565,10 +606,7 @@ export default function settings() {
 												}
 											>
 												<Text
-													style={[
-														typography.description,
-														{ color: Colors[colorScheme].background },
-													]}
+													style={[typography.description, { color: "#fff" }]}
 												>
 													Save
 												</Text>
@@ -583,7 +621,12 @@ export default function settings() {
 
 				{/**Other settings */}
 				<View style={{ alignItems: "flex-start" }}>
-					<Text style={[typography.heading, { textAlign: "left" }]}>
+					<Text
+						style={[
+							typography.heading,
+							{ textAlign: "left", color: Colors[colorScheme].text["0"] },
+						]}
+					>
 						Others
 					</Text>
 				</View>
@@ -622,7 +665,14 @@ export default function settings() {
 												width: "100%",
 											}}
 										>
-											<Text>{item}</Text>
+											<Text
+												style={[
+													typography.subheading,
+													{ color: Colors[colorScheme].text["0"] },
+												]}
+											>
+												{item}
+											</Text>
 										</View>
 
 										{/**Horizontal line */}
@@ -650,7 +700,14 @@ export default function settings() {
 												width: "100%",
 											}}
 										>
-											<Text>{item}</Text>
+											<Text
+												style={[
+													typography.subheading,
+													{ color: Colors[colorScheme].text["0"] },
+												]}
+											>
+												{item}
+											</Text>
 										</View>
 
 										{/**Horizontal line */}
@@ -678,17 +735,22 @@ export default function settings() {
 					{activeSheet === "Unit Measure" ? (
 						<BottomSheetScrollView
 							scrollEnabled={true}
+							style={{
+								flex: 1,
+								backgroundColor: Colors[colorScheme].background,
+							}}
 							showsVerticalScrollIndicator={false}
 						>
 							<UnitMeasure />
 						</BottomSheetScrollView>
 					) : (
-						<BottomSheetView style={{ flex: 1 }}>
-							{activeSheet === "Change Step Goal" ? (
-								<ChangeStepGoal />
-							) : (
-								<Text>Change Step Goal</Text>
-							)}
+						<BottomSheetView
+							style={{
+								height: "100%",
+								backgroundColor: Colors[colorScheme].background,
+							}}
+						>
+							<ChangeStepGoal />
 						</BottomSheetView>
 					)}
 				</BottomSheet>

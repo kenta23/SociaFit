@@ -71,6 +71,9 @@ export const getFeedActivities = async (userid: string) => {
                console.log('userdataError', userdataError);
              }
 
+
+             console.log('userdata', userdata);
+
              if (!folder) {
                return { ...activity, mediaUrls: [] as string[], likes: likesData };
              }
@@ -115,7 +118,7 @@ export const getFeedActivities = async (userid: string) => {
 //feed data for user data or followed users
 export const getUserActivities = async (userid: string) => { 
 
-    const user = await getAuthUser();
+    const user = await getAuthUser() ;
 
     console.log('user', user);
     console.log('userid', userid);
@@ -136,7 +139,7 @@ export const getUserActivities = async (userid: string) => {
        }
 
        const enrichData = await Promise.all(
-          (activities || []).map(async (activity) => {
+          (activities || []).map(async (activity) => { 
 
               //get likes 
               const { data: likes, error: likesError } = await supabase.from('likes').select('*').eq('activity', activity.id as number);
@@ -146,9 +149,9 @@ export const getUserActivities = async (userid: string) => {
               }
 
               //get userdata
-              const { data: userData, error: userDataError } = await supabase.from('userdata').select('*').eq('user_id', userid as string).single();
-              if(userDataError) { 
-                console.log('userDataError', userDataError);
+              const { data: userdata, error: userdataError } = await supabase.from('userdata').select('*').eq('user_id', userid as string).single();
+              if(userdataError) { 
+                console.log('userdataError', userdataError);
               }
 
                 //get media urls on each activity
@@ -166,7 +169,10 @@ export const getUserActivities = async (userid: string) => {
                     }
                     signedMediaUrls = (signed ?? []).map((s) => s.signedUrl);
                 }
-                return { ...activity, mediaUrls: signedMediaUrls, likes, userData };
+
+
+               
+                return { ...activity, mediaUrls: signedMediaUrls, likes, userdata };
             })
          
        )
@@ -189,44 +195,50 @@ export const getUserDetails = async (userid?: string) => {
    }
 
 
+   console.log('FOLLOWERS COUNT', followers?.length);
 
-   const { data: activities, error: activitiesError } = await supabase.from('activities').select('*', { count: 'exact' }).eq('user_id', user as string);
+
+   const { data: activities, error: activitiesError } = await supabase.from('activities').select('*').eq('user_id', user as string);
 
    const { data: userData, error: userDataError } = await supabase.from('userdata').select('*').eq('user_id', user as string).single();
    
    const { data: authUser, error: authUserError } = await getAuthUser();
   
 
-   console.log('activities error', activitiesError);
-   console.log('userData error', userDataError);
-   console.log('authUser error', authUserError);
-   console.log('followers error', followersError);
+   const totalLikes = await supabase.from('likes').select('activity, activities!inner(user_id)', { count: 'exact', head: true }).eq('activities.user_id', user as string);
+
+  //  console.log('activities error', activitiesError);
+  //  console.log('userData error', userDataError);
+  //  console.log('authUser error', authUserError);
+  //  console.log('followers error', followersError); 
+
+   console.log('TOTAL LIKEES', totalLikes);
 
 
 
+   
 
 
+    //  const countActivityLikes = await Promise.all((activities ?? []).map(async (activity) => { 
+    //     const { count: totalActivityLikes, error: totalActivityLikesError } = await supabase
+    //       .from('likes')
+    //       .select('*')
+    //       .eq('activity', activity.id as number);
 
-     const countActivityLikes = await Promise.all((activities ?? []).map(async (activity) => { 
-        const { count: totalActivityLikes, error: totalActivityLikesError } = await supabase
-          .from('likes')
-          .select('*', { count: 'exact', head: true })
-          .eq('activity', activity.id as number);
+    //     if(totalActivityLikesError) { 
+    //       console.log('totalActivityLikesError', totalActivityLikesError);
+    //       return 0;
+    //     }
 
-        if(totalActivityLikesError) { 
-          console.log('totalActivityLikesError', totalActivityLikesError);
-          return 0;
-        }
-
-        console.log('totalActivityLikes', totalActivityLikes);
+    //     console.log('totalActivityLikes', totalActivityLikes);
         
-        return totalActivityLikes;
-      })
-    )
+    //     return totalActivityLikes;
+    //   })
+    // )
 
-    console.log('countActivityLikes', countActivityLikes);
+    console.log('countActivityLikes', activities?.length);
 
-    return { followers, totalLikes: countActivityLikes, countActivities: activities, name: userData?.full_name, email: authUser.user?.email };
+    return { followers, totalLikes: totalLikes.count, countActivities: activities?.length, userData, name: userData?.full_name, email: authUser.user?.email };
 
    
 }

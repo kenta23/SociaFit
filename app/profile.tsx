@@ -60,11 +60,10 @@ export default function Profile() {
 
 	const getUser = async () => {
 		const user = await getAuthUser();
-		setUser(user.data.user?.id as string);
 
 		const data = await getUserDetails(user.data.user?.id as string);
 
-		console.log("DATA", data);
+		// console.log("DATA", data);
 
 		setUserDetails(data as unknown as UserDetailsProps);
 	};
@@ -77,7 +76,10 @@ export default function Profile() {
 	console.log("userDetails EMAIL", userDetails?.email);
 
 	return (
-		<SafeAreaView edges={["bottom"]} style={{ flex: 1 }}>
+		<SafeAreaView
+			edges={["bottom"]}
+			style={{ flex: 1, backgroundColor: Colors[colorScheme].background }}
+		>
 			<ScrollView style={styles.container}>
 				{/**QR CODE SCANNER */}
 
@@ -108,31 +110,81 @@ export default function Profile() {
 							/>
 
 							<View style={styles.nameContainer}>
-								<Text style={[typography.heading]}>{data?.full_name}</Text>
-								<Text style={typography.medium}>{userDetails?.email}</Text>
+								<Text
+									style={[
+										typography.heading,
+										{ color: Colors[colorScheme].text["0"] },
+									]}
+								>
+									{data?.full_name}
+								</Text>
+								<Text
+									style={[
+										typography.medium,
+										{ color: Colors[colorScheme].text["0"] },
+									]}
+								>
+									{userDetails?.email}
+								</Text>
 							</View>
 						</View>
 
 						<View style={[styles.frameGroup, styles.frameFlexBox]}>
 							<View style={[styles.groupFlexBox]}>
-								<Text style={[typography.medium]}>
-									{userDetails?.totalLikes?.length || 0}
+								<Text
+									style={[
+										typography.medium,
+										{ color: Colors[colorScheme].text["0"] },
+									]}
+								>
+									{Number(userDetails?.totalLikes) || 0}
 								</Text>
-								<Text style={[typography.description]}>Total likes</Text>
+								<Text
+									style={[
+										typography.description,
+										{ color: Colors[colorScheme].text["200"] },
+									]}
+								>
+									Total likes
+								</Text>
 							</View>
 
 							<View style={[styles.groupFlexBox]}>
-								<Text style={[typography.medium]}>
-									{userDetails?.countActivities?.length || 0}
+								<Text
+									style={[
+										typography.medium,
+										{ color: Colors[colorScheme].text["0"] },
+									]}
+								>
+									{Number(userDetails?.countActivities) || 0}
 								</Text>
-								<Text style={[typography.description]}>Activities</Text>
+								<Text
+									style={[
+										typography.description,
+										{ color: Colors[colorScheme].text["200"] },
+									]}
+								>
+									Activities
+								</Text>
 							</View>
 
 							<View style={styles.groupFlexBox}>
-								<Text style={[typography.medium]}>
+								<Text
+									style={[
+										typography.medium,
+										{ color: Colors[colorScheme].text["0"] },
+									]}
+								>
 									{userDetails?.followers?.length || 0}
 								</Text>
-								<Text style={[typography.description]}>Followers</Text>
+								<Text
+									style={[
+										typography.description,
+										{ color: Colors[colorScheme].text["200"] },
+									]}
+								>
+									Followers
+								</Text>
 							</View>
 						</View>
 					</View>
@@ -150,7 +202,14 @@ export default function Profile() {
 
 				{/**YOUR ACTIVITIES */}
 				<View style={styles.activitiesContainer}>
-					<Text style={typography.subheading}>Your Activities</Text>
+					<Text
+						style={[
+							typography.subheading,
+							{ color: Colors[colorScheme].text["0"] },
+						]}
+					>
+						Your Activities
+					</Text>
 					<ActivityContent userid={user as string} />
 				</View>
 

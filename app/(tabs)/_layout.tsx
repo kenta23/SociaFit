@@ -5,9 +5,9 @@ import { Colors } from "@/constants/Colors";
 import type { Database } from "@/database.types";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import {
-  useStoreData,
-  useStoreHealthDetails,
-  useStoreWorkoutSplits,
+	useStoreData,
+	useStoreHealthDetails,
+	useStoreWorkoutSplits,
 } from "@/utils/states";
 import { supabase } from "@/utils/supabase";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -33,13 +33,17 @@ export default function TabLayout() {
 		useStoreWorkoutSplits();
 	const { healthDetails, setHealthDetails } = useStoreHealthDetails();
 
-	console.log("data from zustand", data);
+	// console.log("data from zustand", data);
 
 	function HeaderBackIcon() {
 		return (
 			<Pressable style={{ marginLeft: 8 }} onPress={() => router.back()}>
 				<Image
-					source={require("@/assets/back button.svg")}
+					source={
+						colorScheme === "light"
+							? require("@/assets/back button.svg")
+							: require("@/assets/back button dark.png")
+					}
 					style={{ width: 26, height: 26 }}
 				/>
 			</Pressable>

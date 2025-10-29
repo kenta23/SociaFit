@@ -77,6 +77,8 @@ export default function PersonalInfo() {
 
 			if (newAvatar && typeof newAvatar === "string") {
 				setAvatar(newAvatar);
+
+				Alert.alert("Success", "Avatar updated");
 			}
 		}
 	};
@@ -253,7 +255,7 @@ export default function PersonalInfo() {
 								style={{
 									width: 150,
 									borderWidth: 1,
-									borderColor: "#000",
+									borderColor: Colors[colorScheme].tint,
 									height: 150,
 									borderRadius: 100,
 								}}

@@ -46,7 +46,18 @@ September 28, 2025
 
 
 ✔ Finish work on feed page @done(25-10-09 20:56)
-☐ Following function 
-☐ display activities only for the user you follow
-☐ Fix activities page
-☐ Add settings for profile (change name and avatar)
+✔ Following function @done(25-10-23 21:15)
+✔ display activities only for the user you follow @done(25-10-23 21:15)
+✔ Fix activities page @done(25-10-22 20:40)
+✔ Add settings for profile (change name and avatar) @done(25-10-23 21:15)
+
+
+
+October 23, 2025
+✔ Fix dark mode display @done(25-10-28 21:14)
+
+
+October 27, 2025
+✔ Fix dark mode display @done(25-10-28 21:14)
+✔ activities page user full_name not found issue @done(25-10-28 22:15)
+✔ userdata on activities page not found issue @done(25-10-28 21:14)
